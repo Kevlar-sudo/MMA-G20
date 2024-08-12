@@ -44,7 +44,7 @@ class UserManager:
             8: UserProfile(8, "Hank", 32, "Male", "San Antonio", ["fishing", "hiking"]),
             9: UserProfile(9, "Ivy", 29, "Female", "San Diego", ["dancing", "painting"]),
             10: UserProfile(10, "Jack", 26, "Male", "Dallas", ["gaming"]),
-            11: UserProfile(11, "Karen", 31, "Female", "San Jose", ["reading", "swimming"]),
+            11: UserProfile(11, "Karen", 31, "Female", "San Jose", ["reading", "swimming"]),  
             12: UserProfile(12, "Leo", 23, "Male", "Austin", ["running", "music"]),
             13: UserProfile(13, "Mona", 34, "Female", "Jacksonville", ["traveling", "photography"]),
             14: UserProfile(14, "Nate", 28, "Male", "Fort Worth", ["sports", "gaming", "hiking", "reading"]),
