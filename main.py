@@ -102,3 +102,13 @@ class UserManager:
             self.users[user_id].view_profile()
         else:
             print(f"User ID {user_id} does not exist.")
+
+    def delete_user(self, user_id: int) -> None:
+        """
+        Delete an existing user profile.
+        """
+        if user_id in self.users:
+            del self.users[user_id]
+            print(f"User {user_id} deleted successfully!")
+        else:
+            print(f"User ID {user_id} does not exist.")
