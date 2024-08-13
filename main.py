@@ -5,6 +5,9 @@ from tkinter import messagebox
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 
+
+#Button commands should call the function UserManager class and functions in the UserManager class should call UI functions to display info and inputs/command from user.
+
 class GUI:
     def __init__(self):
         self.window = Tk()
@@ -37,6 +40,7 @@ class GUI:
 
     def register_canvas(self):
         self.canvas.delete("all")
+        #Create user info entry boxes
         self.name_entry = Entry(self.window, font=('Arial', 16), width=24)
         self.age_entry = Entry(self.window, font=('Arial', 16), width=8)
         self.gender = StringVar(self.window)
@@ -57,6 +61,7 @@ class GUI:
                                 font=('Arial', 16))
 
     def register_buttons(self):
+        #remove logo and buttons from menu page
         self.new_bottom.grid_forget()
         self.existing_bottom.grid_forget()
 
@@ -64,11 +69,14 @@ class GUI:
                                   command=self.check_profile)
         self.create_user.grid(row=2, column=2)
 
+        #create new create_user button, check if all entry boxes are filled
+
     def log_in_label(self):
         self.label = Label(self.window, text="Log In to Your Account", font=('Arial', 16))
         self.label.grid(row=0, column=0, columnspan=3)
 
     def log_in_canvas(self):
+        #Create user log in entry boxes
         self.canvas.delete("all")
         self.name_entry = Entry(self.window, font=('Arial', 16), width=24)
         self.id_entry = Entry(self.window, font=('Arial', 16), width=8)
@@ -80,9 +88,11 @@ class GUI:
         self.canvas.create_text(100, 150, text="User ID", font=('Arial', 16))
 
     def log_in_buttons(self):
+        #Remove logo and buttons from menu page
         self.new_bottom.grid_forget()
         self.existing_bottom.grid_forget()
 
+        #log in as existing user, check if the user exist
         self.create_user = Button(self.window, text="Log In", font=('Arial', 16))
         self.create_user.grid(row=2, column=2)
 
@@ -112,10 +122,12 @@ class GUI:
         if not complete:
             messagebox.showinfo(title="Oops", message="Please make sure you fill all the boxes")
         else:
+            #pass the profile to the update_profile function in the UserProfile Class
             self.profile_canvas(user_profile)
             manager.add_user(None, user_name, int(user_age), user_gender, user_location, user_interests.split(','))
 
     def profile_canvas(self, profile):
+        #clear the canvas to show the user profile details
         self.canvas.delete("all")
 
         self.canvas.create_text(100, 100, text="Name", font=('Arial', 16))
@@ -187,6 +199,7 @@ class UserProfile:
                        gender: Optional[str] = None, location: Optional[str] = None, 
                        interests: Optional[List[str]] = None) -> None:
         cursor = conn.cursor()
+        #Retrieve the current values if not provided
         cursor.execute("SELECT name, age, gender, location, interests FROM users WHERE user_id = ?", (self.user_id,))
         current_values = cursor.fetchone()
         if current_values:
@@ -197,6 +210,7 @@ class UserProfile:
             self.location = location if location is not None else current_location
             self.interests = interests if interests is not None else current_interests.split(',')
 
+            #Update the database
             cursor.execute("""
                 UPDATE users
                 SET name = ?, age = ?, gender = ?, location = ?, interests = ?
