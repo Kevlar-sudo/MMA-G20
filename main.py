@@ -1,6 +1,113 @@
 import sqlite3
 from typing import Optional, List
 
+"""GUI Library"""
+from tkinter import *
+from tkinter import messagebox
+
+class GUI:
+    def __init__(self):
+        self.window = Tk()
+        self.window.title("Dating App Name")
+
+
+    def menu_label(self):
+        self.label = Label(self.window, text="Welcome to 20PCharm", font=('Arial', 16))
+        self.label.grid(row=0, column=0, columnspan=3)
+
+    def menu_canvas(self):
+        self.canvas = Canvas(height=512, width=512)
+        logo_png = PhotoImage(file="logo.png")
+        self.image_id = self.canvas.create_image(256, 256, image=logo_png)
+        self.canvas.grid(row=1, column=0, columnspan=3)
+
+    def menu_buttons(self):
+        self.new_bottom = Button(self.window, text="New User", font=('Arial', 16), command=self.create_new)
+        self.new_bottom.grid(row=2, column=0)
+
+        self.existing_bottom = Button(self.window, text="Existing User", font=('Arial', 16))
+        self.existing_bottom.grid(row=2, column=2)
+
+    def register_label(self):
+        self.label = Label(self.window, text="Please Enter Your Info to Register", font=('Arial', 16))
+        self.label.grid(row=0, column=0, columnspan=3)
+
+    def register_canvas(self):
+        self.canvas.delete("all")
+        '''create user info entry boxes'''
+        self.name_entry = Entry(self.window, font=('Arial', 16), width=24)
+        self.age_entry = Entry(self.window, font=('Arial', 16), width=8)
+        self.gender = StringVar(self.window)
+        self.gender_entry = OptionMenu(self.window, self.gender, "M", "F")
+        self.location_entry = Entry(self.window, font=('Arial', 16), width=24)
+        self.interests_entry = Entry(self.window, font=('Arial', 16), width=36)
+
+        self.canvas.create_window(300, 100, window=self.name_entry)
+        self.canvas.create_window(204, 150, window=self.age_entry)
+        self.canvas.create_window(172, 200, window=self.gender_entry)
+        self.canvas.create_window(300, 250, window=self.location_entry)
+        self.canvas.create_window(256, 350, window=self.interests_entry)
+        self.canvas.create_text(100, 100, text="Name", font=('Arial', 16))
+        self.canvas.create_text(100, 150, text="Age", font=('Arial', 16))
+        self.canvas.create_text(100, 200, text="Gender", font=('Arial', 16))
+        self.canvas.create_text(100, 250, text="Location", font=('Arial', 16))
+        self.canvas.create_text(256, 300, text="Interests (Please separate your interests by comma)",
+                                font=('Arial', 16))
+
+    def register_buttons(self):
+        '''remove logo and buttons from menu page'''
+        self.new_bottom.grid_forget()
+        self.existing_bottom.grid_forget()
+
+        '''create new create_user button, check if all entry boxes are filled'''
+        self.create_user = Button(self.window, text="Complete My Profile", font=('Arial', 16),
+                                  command=self.check_profile)
+        self.create_user.grid(row=2, column=2)
+
+    def create_new(self):
+        self.register_label()
+        self.register_canvas()
+        self.register_buttons()
+
+    def check_profile(self):
+        user_name = self.name_entry.get()
+        user_age = self.age_entry.get()
+        user_gender = self.gender.get()
+        user_location = self.location_entry.get()
+        user_interests = self.interests_entry.get()
+
+        user_profile = [user_name,user_age,user_gender,user_location,user_interests]
+        complete = True
+        for info in user_profile:
+            if len(info) == 0:
+                complete = False
+                break
+        if not complete:
+            messagebox.showinfo(title="Oops", message="Please make sure you fill all the boxes")
+        else:
+            #self.user_label()
+            self.profile_canvas(user_profile)
+            #self.user_button()
+            """pass the profile to the update_profile function in the UserProfile Class"""
+
+    def profile_canvas(self, profile):
+
+        """clear the canvas to show the user profile details"""
+        self.canvas.delete("all")
+
+        self.canvas.create_text(100, 100, text="Name", font=('Arial', 16))
+        self.canvas.create_text(100, 150, text="Age", font=('Arial', 16))
+        self.canvas.create_text(100, 200, text="Gender", font=('Arial', 16))
+        self.canvas.create_text(100, 250, text="Location", font=('Arial', 16))
+        self.canvas.create_text(100, 300, text="Interests", font=('Arial', 16))
+
+        user_name = profile[0]
+        user_age = profile[1]
+        user_gender = profile[2]
+        user_location = profile[3]
+        user_interests = profile[4]
+        print(user_name,user_age,user_gender,user_location,user_interests)
+
 class UserProfile:
     def __init__(self, user_id: int, name: str, age: int, gender: str, location: str, interests: List[str]) -> None:
         self.user_id = user_id
@@ -156,6 +263,15 @@ class UserManager:
 
 if __name__ == "__main__":
     manager = UserManager("users.db")
-    
-    # Add sample users
+
+""" # Add sample users
     manager.initialize_users()
+    """
+
+UI = GUI()
+
+UI.menu_label()
+UI.menu_canvas()
+UI.menu_buttons()
+
+UI.window.mainloop()

@@ -1,6 +1,8 @@
 import sqlite3
 import os
 
+
+
 def setup_database():
 
     db_file = 'users.db'
