@@ -4,21 +4,21 @@ from typing import Optional, List
 """GUI Library"""
 from tkinter import *
 from tkinter import messagebox
-
+#Button commands should call the function UserManager class and functions in the UserManager class should call UI functions to display info and inputs/command from user.
 class GUI:
     def __init__(self):
         self.window = Tk()
         self.window.title("Dating App Name")
-
+        self.canvas = Canvas(height=512, width=512)
+        self.logo_png = PhotoImage(file="logo.png")
 
     def menu_label(self):
         self.label = Label(self.window, text="Welcome to (Dating App Name)", font=('Arial', 16))
         self.label.grid(row=0, column=0, columnspan=3)
 
     def menu_canvas(self):
-        self.canvas = Canvas(height=512, width=512)
-        logo_png = PhotoImage(file="logo.png")
-        self.image_id = self.canvas.create_image(256, 256, image=logo_png)
+        self.canvas.delete("all")
+        self.canvas.create_image(256, 256, image=self.logo_png)
         self.canvas.grid(row=1, column=0, columnspan=3)
 
     def menu_buttons(self):
@@ -60,6 +60,7 @@ class GUI:
         self.existing_bottom.grid_forget()
 
         '''create new create_user button, check if all entry boxes are filled'''
+
         self.create_user = Button(self.window, text="Complete My Profile", font=('Arial', 16),
                                   command=self.check_profile)
         self.create_user.grid(row=2, column=2)
@@ -186,6 +187,7 @@ class UserProfile:
             print(f"User {self.user_id} not found!")
 
     def view_profile(self) -> None:
+
         print(f"ID: {self.user_id}, Name: {self.name}, Age: {self.age}, "
               f"Gender: {self.gender}, Location: {self.location}, "
               f"Interests: {', '.join(self.interests)}")
