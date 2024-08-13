@@ -12,7 +12,7 @@ class GUI:
 
 
     def menu_label(self):
-        self.label = Label(self.window, text="Welcome to 20PCharm", font=('Arial', 16))
+        self.label = Label(self.window, text="Welcome to (Dating App Name)", font=('Arial', 16))
         self.label.grid(row=0, column=0, columnspan=3)
 
     def menu_canvas(self):
@@ -25,7 +25,7 @@ class GUI:
         self.new_bottom = Button(self.window, text="New User", font=('Arial', 16), command=self.create_new)
         self.new_bottom.grid(row=2, column=0)
 
-        self.existing_bottom = Button(self.window, text="Existing User", font=('Arial', 16))
+        self.existing_bottom = Button(self.window, text="Existing User", font=('Arial', 16), command=self.log_in)
         self.existing_bottom.grid(row=2, column=2)
 
     def register_label(self):
@@ -64,10 +64,41 @@ class GUI:
                                   command=self.check_profile)
         self.create_user.grid(row=2, column=2)
 
+    def log_in_label(self):
+        self.label = Label(self.window, text="Log In to Your Account", font=('Arial', 16))
+        self.label.grid(row=0, column=0, columnspan=3)
+
+    def log_in_canvas(self):
+        self.canvas.delete("all")
+        '''create user log in entry boxes'''
+        self.name_entry = Entry(self.window, font=('Arial', 16), width=24)
+        self.id_entry = Entry(self.window, font=('Arial', 16), width=8)
+
+        self.canvas.create_window(300, 200, window=self.name_entry)
+        self.canvas.create_window(204, 150, window=self.id_entry)
+
+        self.canvas.create_text(100, 200, text="Name", font=('Arial', 16))
+        self.canvas.create_text(100, 150, text="User ID", font=('Arial', 16))
+
+
+    def log_in_buttons(self):
+        '''remove logo and buttons from menu page'''
+        self.new_bottom.grid_forget()
+        self.existing_bottom.grid_forget()
+
+        '''log in as existing user, check if the user exist'''
+        self.create_user = Button(self.window, text="Log In", font=('Arial', 16))
+        self.create_user.grid(row=2, column=2)
+
     def create_new(self):
         self.register_label()
         self.register_canvas()
         self.register_buttons()
+
+    def log_in(self):
+        self.log_in_label()
+        self.log_in_canvas()
+        self.log_in_buttons()
 
     def check_profile(self):
         user_name = self.name_entry.get()
@@ -75,6 +106,7 @@ class GUI:
         user_gender = self.gender.get()
         user_location = self.location_entry.get()
         user_interests = self.interests_entry.get()
+
 
         user_profile = [user_name,user_age,user_gender,user_location,user_interests]
         complete = True
@@ -89,6 +121,7 @@ class GUI:
             self.profile_canvas(user_profile)
             #self.user_button()
             """pass the profile to the update_profile function in the UserProfile Class"""
+            manager.add_user(user_profile)
 
     def profile_canvas(self, profile):
 
