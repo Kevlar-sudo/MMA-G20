@@ -283,13 +283,15 @@ class UserManager:
                 age INTEGER,
                 gender TEXT,
                 location TEXT,
-                interests TEXT
+                interests TEXT,
+                liked_users TEXT,
+                disliked_users TEXT,
+                matches TEXT
             )
         """)
         self.conn.commit()
 
     def add_user(self, user_id: Optional[int], name: str, age: int, gender: str, location: str, interests: List[str]) -> None:
-        #Need to assign user_id to the new user
         user = UserProfile(user_id, name, age, gender, location, interests)
         user.save_to_db(self.conn)
         print(f"User {user.user_id} added successfully!")
@@ -302,13 +304,56 @@ class UserManager:
         if not row1:
             return False
         else:
-            print(row1)
             if row1[1] != user_name:
                 return False
             else:
                 user1 = UserProfile(row1[0], row1[1], row1[2], row1[3], row1[4], row1[5].split(','))
-                print(user1)
                 return user1
+
+    def like_user(self, current_user_id: int, liked_user_id: int) -> None:
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT liked_users FROM users WHERE user_id = ?", (current_user_id,))
+        liked_users = cursor.fetchone()[0]
+        
+        if liked_users:
+            liked_users_list = liked_users.split(',')
+        else:
+            liked_users_list = []
+        
+        if str(liked_user_id) not in liked_users_list:
+            liked_users_list.append(str(liked_user_id))
+            cursor.execute("""
+                UPDATE users 
+                SET liked_users = ?
+                WHERE user_id = ?
+            """, (','.join(liked_users_list), current_user_id))
+            self.conn.commit()
+            print(f"User {current_user_id} liked user {liked_user_id}")
+        else:
+            print(f"User {current_user_id} has already liked user {liked_user_id}")
+
+    def dislike_user(self, current_user_id: int, disliked_user_id: int) -> None:
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT disliked_users FROM users WHERE user_id = ?", (current_user_id,))
+        disliked_users = cursor.fetchone()[0]
+        
+        if disliked_users:
+            disliked_users_list = disliked_users.split(',')
+        else:
+            disliked_users_list = []
+
+        if str(disliked_user_id) not in disliked_users_list:
+            disliked_users_list.append(str(disliked_user_id))
+            cursor.execute("""
+                UPDATE users 
+                SET disliked_users = ?
+                WHERE user_id = ?
+            """, (','.join(disliked_users_list), current_user_id))
+            self.conn.commit()
+            print(f"User {current_user_id} disliked user {disliked_user_id}")
+        else:
+            print(f"User {current_user_id} has already disliked user {disliked_user_id}")
+
 
     def compare_users(self, user_id1: int, user_id2: int) -> None:
         if self.user_exists(user_id1) and self.user_exists(user_id2):
