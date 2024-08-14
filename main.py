@@ -196,14 +196,20 @@ class GUI:
 
 
 class UserProfile:
-    def __init__(self, user_id: int, name: str, age: int, gender: str, location: str, interests: List[str]) -> None:
+    def __init__(self, user_id: int, name: str, age: int, gender: str, location: str, interests: List[str],
+                 liked_users: Optional[List[int]] = None, disliked_users: Optional[List[int]] = None,
+                 matched_users: Optional[List[int]] = None) -> None:
         self.user_id = user_id
         self.name = name
         self.age = age
         self.gender = gender
         self.location = location
         self.interests = interests
+        self.liked_users = liked_users if liked_users is not None else []
+        self.disliked_users = disliked_users if disliked_users is not None else []
+        self.matched_users = matched_users if matched_users is not None else []
         self.geolocator = Nominatim(user_agent="dating_app")
+
 
     def get_location_coordinates(self, location: str):
         location_data = self.geolocator.geocode(location)
@@ -232,37 +238,50 @@ class UserProfile:
     def save_to_db(self, conn: sqlite3.Connection) -> None:
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO users (name, age, gender, location, interests)
-            VALUES (?, ?, ?, ?, ?)
-        """, (self.name, self.age, self.gender, self.location, ','.join(self.interests)))
+            INSERT INTO users (name, age, gender, location, interests, liked_users, disliked_users, matches)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (self.name, self.age, self.gender, self.location, ','.join(self.interests),
+            ','.join(map(str, self.liked_users)),
+            ','.join(map(str, self.disliked_users)),
+            ','.join(map(str, self.matched_users))))
         self.user_id = cursor.lastrowid
         conn.commit()
 
-    def update_profile(self, conn: sqlite3.Connection, name: Optional[str] = None, age: Optional[int] = None, 
-                       gender: Optional[str] = None, location: Optional[str] = None, 
-                       interests: Optional[List[str]] = None) -> None:
+    def update_profile(self, conn: sqlite3.Connection, name: Optional[str] = None, age: Optional[int] = None,
+                    gender: Optional[str] = None, location: Optional[str] = None,
+                    interests: Optional[List[str]] = None, liked_users: Optional[List[int]] = None,
+                    disliked_users: Optional[List[int]] = None, matched_users: Optional[List[int]] = None) -> None:
         cursor = conn.cursor()
-        #Retrieve the current values if not provided
-        cursor.execute("SELECT name, age, gender, location, interests FROM users WHERE user_id = ?", (self.user_id,))
+        # Retrieve the current values if not provided
+        cursor.execute("SELECT name, age, gender, location, interests, liked_users, disliked_users, matches FROM users WHERE user_id = ?", (self.user_id,))
         current_values = cursor.fetchone()
         if current_values:
-            current_name, current_age, current_gender, current_location, current_interests = current_values
+            current_name, current_age, current_gender, current_location, current_interests, \
+            current_liked_users, current_disliked_users, current_matched_users = current_values
             self.name = name if name is not None else current_name
             self.age = age if age is not None else current_age
             self.gender = gender if gender is not None else current_gender
             self.location = location if location is not None else current_location
             self.interests = interests if interests is not None else current_interests.split(',')
+            self.liked_users = liked_users if liked_users is not None else current_liked_users.split(',') if current_liked_users else []
+            self.disliked_users = disliked_users if disliked_users is not None else current_disliked_users.split(',') if current_disliked_users else []
+            self.matched_users = matched_users if matched_users is not None else current_matched_users.split(',') if current_matched_users else []
 
-            #Update the database
+            # Update the database
             cursor.execute("""
                 UPDATE users
-                SET name = ?, age = ?, gender = ?, location = ?, interests = ?
+                SET name = ?, age = ?, gender = ?, location = ?, interests = ?, liked_users = ?, disliked_users = ?, matches = ?
                 WHERE user_id = ?
-            """, (self.name, self.age, self.gender, self.location, ','.join(self.interests), self.user_id))
+            """, (self.name, self.age, self.gender, self.location, ','.join(self.interests),
+                ','.join(map(str, self.liked_users)),
+                ','.join(map(str, self.disliked_users)),
+                ','.join(map(str, self.matched_users)),
+                self.user_id))
             conn.commit()
             print(f"User {self.user_id} updated successfully!")
         else:
             print(f"User {self.user_id} not found!")
+
 
     def view_profile(self) -> None:
         print(f"ID: {self.user_id}, Name: {self.name}, Age: {self.age}, "
@@ -297,6 +316,7 @@ class UserManager:
         print(f"User {user.user_id} added successfully!")
         UI.profile_page(user)
 
+
     def user_exists(self, user_id: int, user_name: str):
         cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
@@ -307,8 +327,12 @@ class UserManager:
             if row1[1] != user_name:
                 return False
             else:
-                user1 = UserProfile(row1[0], row1[1], row1[2], row1[3], row1[4], row1[5].split(','))
+                user1 = UserProfile(row1[0], row1[1], row1[2], row1[3], row1[4], row1[5].split(','),
+                                    row1[6].split(',') if row1[6] else [],
+                                    row1[7].split(',') if row1[7] else [],
+                                    row1[8].split(',') if row1[8] else [])
                 return user1
+
 
     def like_user(self, current_user_id: int, liked_user_id: int) -> None:
         cursor = self.conn.cursor()
