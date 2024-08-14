@@ -4,6 +4,8 @@ from tkinter import *
 from tkinter import messagebox
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
+import pandas as pd
+import numpy as np
 
 
 
@@ -446,6 +448,88 @@ class UserManager:
             user = UserProfile(row[0], row[1], row[2], row[3], row[4], row[5].split(','))
             user.view_profile()
 
+        def fetch_all_users():
+            conn = sqlite3.connect('users.db')
+            global df
+            df = pd.read_sql_query("SELECT * FROM users", conn)
+
+            # Convert each comma-separated string in the 'interests' column to a list of interests
+            df['interests'] = df['interests'].apply(
+                lambda x: x.split(',') if x else [])
+            # lambda x:        -> Defines an anonymous function with 'x' as the input (each element in the 'interests' column)
+            # x.split(',')     -> Splits the string 'x' by commas into a list (e.g., "hiking,reading" becomes ['hiking', 'reading'])
+            # if x             -> Checks if 'x' is not empty or None. If 'x' has content, split it by commas.
+            # else []          -> If 'x' is empty or None, return an empty list instead of trying to split 'x'
+
+            conn.close()
+            return df
+
+        # Compute Compatibility Scores
+        def compute_compatibility_scores(logged_in_user, users_df):
+            # Exclude the logged-in user from potential matches
+            # exclude yourself
+            potential_matches = users_df[users_df['user_id'] != logged_in_user.user_id].copy()
+
+            # Calculate **location** compatibility score using a boolean mask and convert to float
+            potential_matches['location_score'] = (potential_matches['location'] == logged_in_user.location).astype(
+                float)
+            # Alternative is to go over location by location and set to 1.0 when matches and 0.0 if doesn't
+            # more creative: use Geo-location (so convert address to GPS point)
+
+            # we also want to consider gender as a factor that can affect the matching sco
+
+            # Calculate **age** difference score using NumPy's vectorized operations
+            potential_matches['age_diff_score'] = 1 / (1 + np.abs(potential_matches['age'] - logged_in_user.age))
+
+            # Convert **interests** lists into a set for the logged-in user for faster comparison
+            logged_in_interests_set = set(logged_in_user.interests)
+
+            # Optimize shared interests score calculation using list comprehension and apply
+            def calculate_jaccard_similarity_vectorized(interests):
+
+                # Calculate intersection and union sizes directly
+                category = []
+                for interest in df["interests"]:
+                    if interest in ["cycling", "hiking", "swimming", "dancing", "running", "sports", "yoga"]:
+                        category.append("Sports")
+                    elif interest in ["music", "art", "painting"]:
+                        category.append("Art")
+                    elif interest in ["gardening", "fishing", "photography", "travelling", "cooking"]:
+                        category.append("Lifestyle")
+                    elif interest in ["reading", "coding", "writing", "gaming"]:
+                        category.append("Intellectual")
+
+                category_set = set(category)
+                logged_in_category_set = set(logged_in_user.category)
+                intersection_size = len(logged_in_category_set & category_set)
+                union_size = len(logged_in_category_set | category_set)
+
+                # Return the Jaccard similarity score
+                return intersection_size / union_size if union_size > 0 else 0
+
+            # Apply the vectorized Jaccard similarity calculation to all potential matches
+            potential_matches['interests_score'] = potential_matches['interests'].apply(
+                calculate_jaccard_similarity_vectorized)
+
+            # Combine the individual scores into a final compatibility score using NumPy's vectorized operations
+            potential_matches['compatibility_score'] = (
+                    0.4 * potential_matches['location_score'] +
+                    0.3 * potential_matches['age_diff_score'] +
+                    0.3 * potential_matches['interests_score'])
+
+            # Sort by the compatibility score in descending order
+            potential_matches = potential_matches.sort_values(by='compatibility_score', ascending=False)
+
+            return potential_matches
+
+        # Rank the Potential Matches and Display the Top 3
+        def display_top_matches(potential_matches, top_n=3):
+            top_matches = potential_matches[['user_id', 'name', 'location', 'age', 'compatibility_score']].head(top_n)
+            print("Top Matches:")
+            print(top_matches)
+            return top_matches
+
+
 if __name__ == "__main__":
     manager = UserManager("users.db")
 
@@ -462,3 +546,4 @@ if __name__ == "__main__":
 
     UI.window.mainloop()
 
+#Load All Users into a Pandas DataFrame
