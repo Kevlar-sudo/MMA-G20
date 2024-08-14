@@ -6,6 +6,7 @@ from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 
 
+
 #Button commands should call the function UserManager class and functions in the UserManager class should call UI functions to display info and inputs/command from user.
 
 class GUI:
@@ -13,32 +14,38 @@ class GUI:
         self.window = Tk()
         self.window.title("Dating App Name")
         self.canvas = Canvas(height=512, width=512)
+        self.commandcanvas = Canvas(height = 128, width = 512)
         self.logo_png = PhotoImage(file="logo.png")
-
-    def menu_label(self):
         self.label = Label(self.window, text="Welcome to (Dating App Name)", font=('Arial', 16))
-        self.label.grid(row=0, column=0, columnspan=3)
+        self.label.grid(row=0, column=0)
 
-    def menu_canvas(self):
+    def menu_page(self):
+        self.label.destroy()
+        self.label = Label(self.window, text="Welcome to (Dating App Name)", font=('Arial', 16))
+        self.label.grid(row=0, column=0)
+
         self.canvas.delete("all")
         self.canvas.create_image(256, 256, image=self.logo_png)
-        self.canvas.grid(row=1, column=0, columnspan=3)
+        self.canvas.grid(row=1, column=0)
 
-    def menu_buttons(self):
-        self.new_bottom = Button(self.window, text="New User", font=('Arial', 16), command=self.create_new)
-        self.new_bottom.grid(row=2, column=0)
+        self.commandcanvas.delete("all")
 
-        self.existing_bottom = Button(self.window, text="Existing User", font=('Arial', 16), command=self.log_in)
-        self.existing_bottom.grid(row=2, column=2)
+        self.new_button = Button(self.window, text="New User", font=('Arial', 16), command=self.register_page)
+        self.commandcanvas.create_window(100,30,window=self.new_button)
 
+        self.existing_button = Button(self.window, text="Existing User", font=('Arial', 16), command=self.log_in_page)
+        self.commandcanvas.create_window(400,30,window=self.existing_button)
+
+        self.commandcanvas.grid(row=2, column=0)
+        '''
         self.compare_button = Button(self.window, text="Compare Users", font=('Arial', 16), command=self.compare_users)
-        self.compare_button.grid(row=3, column=1)
+        self.compare_button.grid(row=3, column=1)'''
 
-    def register_label(self):
+    def register_page(self):
+        self.label.destroy()
         self.label = Label(self.window, text="Please Enter Your Info to Register", font=('Arial', 16))
-        self.label.grid(row=0, column=0, columnspan=3)
+        self.label.grid(row=0, column=0)
 
-    def register_canvas(self):
         self.canvas.delete("all")
         #Create user info entry boxes
         self.name_entry = Entry(self.window, font=('Arial', 16), width=24)
@@ -60,22 +67,20 @@ class GUI:
         self.canvas.create_text(256, 300, text="Interests (Please separate your interests by comma)",
                                 font=('Arial', 16))
 
-    def register_buttons(self):
-        #remove logo and buttons from menu page
-        self.new_bottom.grid_forget()
-        self.existing_bottom.grid_forget()
+        #remove buttons from menu page
+        self.commandcanvas.delete("all")
 
         self.create_user = Button(self.window, text="Complete My Profile", font=('Arial', 16),
                                   command=self.check_profile)
-        self.create_user.grid(row=2, column=2)
+        self.commandcanvas.create_window(400,30,window=self.create_user)
 
         #create new create_user button, check if all entry boxes are filled
 
-    def log_in_label(self):
+    def log_in_page(self):
+        self.label.destroy()
         self.label = Label(self.window, text="Log In to Your Account", font=('Arial', 16))
-        self.label.grid(row=0, column=0, columnspan=3)
+        self.label.grid(row=0, column=0)
 
-    def log_in_canvas(self):
         #Create user log in entry boxes
         self.canvas.delete("all")
         self.name_entry = Entry(self.window, font=('Arial', 16), width=24)
@@ -87,24 +92,13 @@ class GUI:
         self.canvas.create_text(100, 200, text="Name", font=('Arial', 16))
         self.canvas.create_text(100, 150, text="User ID", font=('Arial', 16))
 
-    def log_in_buttons(self):
-        #Remove logo and buttons from menu page
-        self.new_bottom.grid_forget()
-        self.existing_bottom.grid_forget()
+        #Remove buttons from menu page
+        self.commandcanvas.delete("all")
 
         #log in as existing user, check if the user exist
-        self.create_user = Button(self.window, text="Log In", font=('Arial', 16))
-        self.create_user.grid(row=2, column=2)
+        self.user_log_in = Button(self.window, text="Log In", font=('Arial', 16), command = self.check_log_in)
+        self.commandcanvas.create_window(400,30,window=self.user_log_in)
 
-    def create_new(self):
-        self.register_label()
-        self.register_canvas()
-        self.register_buttons()
-
-    def log_in(self):
-        self.log_in_label()
-        self.log_in_canvas()
-        self.log_in_buttons()
 
     def check_profile(self):
         user_name = self.name_entry.get()
@@ -121,27 +115,75 @@ class GUI:
                 break
         if not complete:
             messagebox.showinfo(title="Oops", message="Please make sure you fill all the boxes")
+        elif user_age.isnumeric() == False:
+            messagebox.showinfo(title="Oops", message="Age should be a number")
         else:
             #pass the profile to the update_profile function in the UserProfile Class
-            self.profile_canvas(user_profile)
             manager.add_user(None, user_name, int(user_age), user_gender, user_location, user_interests.split(','))
 
-    def profile_canvas(self, profile):
+    def check_log_in(self):
+        user_name = self.name_entry.get()
+        user_id = self.id_entry.get()
+
+        if len(user_id) == 0 or len(user_name) == 0:
+            messagebox.showinfo(title="Oops", message="Please make sure you fill all the boxes")
+        elif user_id.isnumeric() == False:
+            messagebox.showinfo(title="Oops", message="ID should be a number")
+        else:
+            user_result = manager.user_exists(int(user_id), user_name)
+            print(user_result)
+            if user_result== False:
+                messagebox.showinfo(title="Oops", message="User does not exist")
+            else:
+                self.profile_page(user_result)
+
+
+
+
+    def profile_page(self, current_user):
+        self.label.destroy()
+        self.label = Label(self.window, text=f"{current_user.name}, Welcome Back!", font=('Arial', 16))
+        self.label.grid(row=0, column=0)
+
         #clear the canvas to show the user profile details
         self.canvas.delete("all")
 
-        self.canvas.create_text(100, 100, text="Name", font=('Arial', 16))
-        self.canvas.create_text(100, 150, text="Age", font=('Arial', 16))
-        self.canvas.create_text(100, 200, text="Gender", font=('Arial', 16))
-        self.canvas.create_text(100, 250, text="Location", font=('Arial', 16))
-        self.canvas.create_text(100, 300, text="Interests", font=('Arial', 16))
+        self.canvas.create_text(100, 100, text="User ID", font=('Arial', 16))
+        self.canvas.create_text(100, 150, text="Name", font=('Arial', 16))
+        self.canvas.create_text(100, 200, text="Age", font=('Arial', 16))
+        self.canvas.create_text(100, 250, text="Gender", font=('Arial', 16))
+        self.canvas.create_text(100, 300, text="Location", font=('Arial', 16))
+        self.canvas.create_text(100, 350, text="Interests", font=('Arial', 16))
 
-        user_name = profile[0]
-        user_age = profile[1]
-        user_gender = profile[2]
-        user_location = profile[3]
-        user_interests = profile[4]
-        print(user_name, user_age, user_gender, user_location, user_interests)
+        self.canvas.create_text(300, 100, text=current_user.user_id, font=('Arial', 16))
+        self.canvas.create_text(300, 150, text=current_user.name, font=('Arial', 16))
+        self.canvas.create_text(300, 200, text=current_user.age, font=('Arial', 16))
+        self.canvas.create_text(300, 250, text=current_user.gender, font=('Arial', 16))
+        self.canvas.create_text(300, 300, text=current_user.location, font=('Arial', 16))
+        self.canvas.create_text(300, 350, text=','.join(current_user.interests), font=('Arial', 16))
+
+        # Remove buttons from previous page
+        self.commandcanvas.delete("all")
+
+        # show user options
+        self.user_log_out = Button(self.window, text="Log Out", font=('Arial', 16), command=self.menu_page)
+        self.commandcanvas.create_window(90, 30, window=self.user_log_out)
+
+        self.user_browse = Button(self.window, text="Start Browsing", font=('Arial', 16))
+        self.commandcanvas.create_window(230, 30, window=self.user_browse)
+
+        self.user_update = Button(self.window, text="Update Profile", font=('Arial', 16))
+        self.commandcanvas.create_window(400, 30, window=self.user_update)
+
+        self.user_liked = Button(self.window, text="Liked User", font=('Arial', 16))
+        self.commandcanvas.create_window(90, 80, window=self.user_liked)
+
+        self.user_disliked = Button(self.window, text="Disliked User", font=('Arial', 16))
+        self.commandcanvas.create_window(230, 80, window=self.user_disliked)
+
+        self.user_matched = Button(self.window, text="Matched User", font=('Arial', 16))
+        self.commandcanvas.create_window(400, 80, window=self.user_matched)
+
 
     def compare_users(self):
         user_id1 = int(self.id_entry.get())
@@ -151,6 +193,7 @@ class GUI:
         compare_button = Button(self.window, text="Get Compatibility", font=('Arial', 16),
                                 command=lambda: manager.compare_users(user_id1, int(self.compare_id_entry.get())))
         compare_button.grid(row=3, column=3)
+
 
 class UserProfile:
     def __init__(self, user_id: int, name: str, age: int, gender: str, location: str, interests: List[str]) -> None:
@@ -246,14 +289,26 @@ class UserManager:
         self.conn.commit()
 
     def add_user(self, user_id: Optional[int], name: str, age: int, gender: str, location: str, interests: List[str]) -> None:
+        #Need to assign user_id to the new user
         user = UserProfile(user_id, name, age, gender, location, interests)
         user.save_to_db(self.conn)
         print(f"User {user.user_id} added successfully!")
+        UI.profile_page(user)
 
-    def user_exists(self, user_id: int) -> bool:
+    def user_exists(self, user_id: int, user_name: str):
         cursor = self.conn.cursor()
-        cursor.execute("SELECT 1 FROM users WHERE user_id = ?", (user_id,))
-        return cursor.fetchone() is not None
+        cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+        row1 = cursor.fetchone()
+        if not row1:
+            return False
+        else:
+            print(row1)
+            if row1[1] != user_name:
+                return False
+            else:
+                user1 = UserProfile(row1[0], row1[1], row1[2], row1[3], row1[4], row1[5].split(','))
+                print(user1)
+                return user1
 
     def compare_users(self, user_id1: int, user_id2: int) -> None:
         if self.user_exists(user_id1) and self.user_exists(user_id2):
@@ -325,13 +380,16 @@ class UserManager:
 if __name__ == "__main__":
     manager = UserManager("users.db")
 
+    '''
     # Add test users (You can comment these out later)
     manager.add_user(None, "Alice", 30, "F", "New York", ["reading", "coding"])
     manager.add_user(None, "Bob", 25, "M", "Los Angeles", ["hiking", "gaming"])
     manager.add_user(None, "Charlie", 28, "M", "Chicago", ["music", "sports", "traveling"])
+    '''
+
 
     UI = GUI()
-    UI.menu_label()
-    UI.menu_canvas()
-    UI.menu_buttons()
+    UI.menu_page()
+
     UI.window.mainloop()
+
