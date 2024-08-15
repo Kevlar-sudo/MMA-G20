@@ -478,17 +478,13 @@ class UserManager:
                 user1 = UserProfile(row1[0], row1[1], row1[2], row1[3], row1[4], row1[5],row1[6],row1[7],row1[8])
                 return user1
 
-
+        
     def like_user(self, current_user_id: int, liked_user_id: int):
         cursor = self.conn.cursor()
+
         cursor.execute("SELECT liked_users FROM users WHERE user_id = ?", (current_user_id,))
         liked_users = cursor.fetchone()[0]
-        
-        if liked_users:
-            liked_users_list = liked_users.split(',')
-        else:
-            liked_users_list = []
-        
+        liked_users_list = liked_users.split(',') if liked_users else []
         if str(liked_user_id) not in liked_users_list:
             liked_users_list.append(str(liked_user_id))
             cursor.execute("""
@@ -497,9 +493,31 @@ class UserManager:
                 WHERE user_id = ?
             """, (','.join(liked_users_list), current_user_id))
             self.conn.commit()
+            cursor.execute("SELECT liked_users FROM users WHERE user_id = ?", (liked_user_id,))
+            other_liked_users = cursor.fetchone()[0]
+            other_liked_users_list = other_liked_users.split(',') if other_liked_users else []
+            if str(current_user_id) in other_liked_users_list:
+                self._add_to_matches(current_user_id, liked_user_id)
+                self._add_to_matches(liked_user_id, current_user_id)
+                messagebox.showinfo(title="It's a Match!", message="You have a new match!")
             return True
         else:
             return False
+
+    def _add_to_matches(self, user_id: int, matched_user_id: int):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT matches FROM users WHERE user_id = ?", (user_id,))
+        matched_users = cursor.fetchone()[0]
+        matched_users_list = matched_users.split(',') if matched_users else []
+
+        if str(matched_user_id) not in matched_users_list:
+            matched_users_list.append(str(matched_user_id))
+            cursor.execute("""
+                UPDATE users
+                SET matches = ?
+                WHERE user_id = ?
+            """, (','.join(matched_users_list), user_id))
+            self.conn.commit()
 
     def dislike_user(self, current_user_id: int, disliked_user_id: int):
         cursor = self.conn.cursor()
