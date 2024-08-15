@@ -236,7 +236,7 @@ class GUI:
         self.user_matched.bind("<Leave>", lambda e: on_leave(e, self.user_matched))
         self.commandcanvas.create_window(400, 80, window=self.user_matched)
 
-        self.user_delete = Button(self.window, text="Delete My Profile", font=('Arial', 16), command=lambda: self.matched_page(current_user))
+        self.user_delete = Button(self.window, text="Delete My Profile", font=('Arial', 16), command=lambda: self.delete_current_user(current_user))
         self.user_delete.bind("<Enter>", lambda e: on_enter(e, self.user_delete))
         self.user_delete.bind("<Leave>", lambda e: on_leave(e, self.user_delete))
         self.commandcanvas.create_window(230, 30, window=self.user_delete)
@@ -354,6 +354,16 @@ class GUI:
                                       command=lambda: self.profile_page(current_user))
         self.commandcanvas.create_window(300, 80, window=self.back_to_profile)
 
+    
+    def delete_current_user(self, current_user):
+            confirmation = messagebox.askyesno("Delete Profile", "Are you sure you want to delete your profile?")
+            if confirmation:
+                manager.delete_user(current_user.user_id)
+                messagebox.showinfo("Profile Deleted", "Your profile has been deleted successfully.")
+                # Redirect to the login page or exit the application
+                self.log_in_page()
+
+
     def matched_page(self, current_user):
         #fetch all the info of the liked users, put in a dict, key are names
         user_dict = manager.fetch_users(current_user.matched_users)
@@ -380,6 +390,10 @@ class GUI:
                                       command=lambda: self.profile_page(current_user))
         self.commandcanvas.create_window(300, 80, window=self.back_to_profile)
 
+
+
+
+        
 
     def like_user(self, current_user, other_user):
         result = manager.like_user(current_user.user_id, other_user.user_id)
@@ -524,6 +538,35 @@ class UserManager:
             )
         """)
         self.conn.commit()
+
+
+    #POTENTIALLY REMOVE THIS TBD
+        def delete_user(self, current_user):
+            #fetch all the info of the liked users, put in a dict, key are names
+            user_dict = manager.fetch_users(current_user.matched_users)
+
+            self.label.destroy()
+            self.label = Label(self.window, text=f"You have matched {len(current_user.matched_users)} users", font=('Arial', 16))
+            self.label.grid(row=0, column=0)
+
+            # clear the canvas to show the user profile details
+            self.canvas.delete("all")
+            # Remove buttons from previous page
+            self.commandcanvas.delete("all")
+
+            if user_dict is not False:
+                selected_user = StringVar()
+                self.matched_entry = OptionMenu(self.window, selected_user, *list(user_dict.keys()))
+                self.commandcanvas.create_window(90, 30, window=self.matched_entry)
+
+                self.display_button = Button(self.window, text="Display Selected User Profile", font=('Arial', 16),
+                                    command=lambda: self.display_profile(user_dict[selected_user.get()]))
+                self.commandcanvas.create_window(300, 30, window=self.display_button)
+
+            self.back_to_profile = Button(self.window, text="Back to My Profile", font=('Arial', 16),
+                                        command=lambda: self.profile_page(current_user))
+            self.commandcanvas.create_window(300, 80, window=self.back_to_profile)
+
 
     def add_user(self, user_id: Optional[int], name: str, age: int, gender: str, location: str, interests: str, liked_users: str, disliked_users: str, matched_users: str) -> None:
         user = UserProfile(user_id, name, age, gender, location, interests, liked_users, disliked_users, matched_users)
@@ -673,13 +716,11 @@ class UserManager:
             print(f"User ID {user_id} does not exist.")
 
     def delete_user(self, user_id: int) -> None:
-        if self.user_exists(user_id):
             cursor = self.conn.cursor()
             cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
             self.conn.commit()
             print(f"User {user_id} deleted successfully!")
-        else:
-            print(f"User ID {user_id} does not exist.")
+        
 
     def view_all_users(self) -> None:
         cursor = self.conn.cursor()
