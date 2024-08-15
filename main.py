@@ -151,7 +151,7 @@ class GUI:
             messagebox.showinfo(title="Oops", message="Age should be a number")
         else:
             #pass the profile to the update_profile function in the UserProfile Class
-            manager.add_user(None, user_name, int(user_age), user_gender, user_location, user_interests.split(','),'','','')
+            manager.add_user(None, user_name, int(user_age), user_gender, user_location, user_interests,None,None,None)
 
     def check_log_in(self):
         user_name = self.name_entry.get()
@@ -394,7 +394,7 @@ class GUI:
         result = manager.dislike_user(current_user.user_id, other_user.user_id)
         if result == True:
             current_user.disliked_users.append(other_user.user_id)
-            messagebox.showinfo(title="I'm SORRY!", message="You DISLIKE has been saved")
+            messagebox.showinfo(title="Thank you!", message="You DISLIKE has been saved")
         else:
             messagebox.showinfo(title="oops!", message="You already disliked this person")
         self.browse_page(current_user)
@@ -524,7 +524,7 @@ class UserManager:
         """)
         self.conn.commit()
 
-    def add_user(self, user_id: Optional[int], name: str, age: int, gender: str, location: str, interests: str, liked_users: str, disliked_users: str, matches_users: str) -> None:
+    def add_user(self, user_id: Optional[int], name: str, age: int, gender: str, location: str, interests: str, liked_users: str, disliked_users: str, matched_users: str) -> None:
         user = UserProfile(user_id, name, age, gender, location, interests, liked_users, disliked_users, matched_users)
         user.save_to_db(self.conn)
         print(f"User {user.user_id} added successfully!")
@@ -544,17 +544,13 @@ class UserManager:
                 user1 = UserProfile(row1[0], row1[1], row1[2], row1[3], row1[4], row1[5],row1[6],row1[7],row1[8])
                 return user1
 
-
+        
     def like_user(self, current_user_id: int, liked_user_id: int):
         cursor = self.conn.cursor()
+
         cursor.execute("SELECT liked_users FROM users WHERE user_id = ?", (current_user_id,))
         liked_users = cursor.fetchone()[0]
-        
-        if liked_users:
-            liked_users_list = liked_users.split(',')
-        else:
-            liked_users_list = []
-        
+        liked_users_list = liked_users.split(',') if liked_users else []
         if str(liked_user_id) not in liked_users_list:
             liked_users_list.append(str(liked_user_id))
             cursor.execute("""
@@ -563,9 +559,31 @@ class UserManager:
                 WHERE user_id = ?
             """, (','.join(liked_users_list), current_user_id))
             self.conn.commit()
+            cursor.execute("SELECT liked_users FROM users WHERE user_id = ?", (liked_user_id,))
+            other_liked_users = cursor.fetchone()[0]
+            other_liked_users_list = other_liked_users.split(',') if other_liked_users else []
+            if str(current_user_id) in other_liked_users_list:
+                self._add_to_matches(current_user_id, liked_user_id)
+                self._add_to_matches(liked_user_id, current_user_id)
+                messagebox.showinfo(title="It's a Match!", message="You have a new match!")
             return True
         else:
             return False
+
+    def _add_to_matches(self, user_id: int, matched_user_id: int):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT matches FROM users WHERE user_id = ?", (user_id,))
+        matched_users = cursor.fetchone()[0]
+        matched_users_list = matched_users.split(',') if matched_users else []
+
+        if str(matched_user_id) not in matched_users_list:
+            matched_users_list.append(str(matched_user_id))
+            cursor.execute("""
+                UPDATE users
+                SET matches = ?
+                WHERE user_id = ?
+            """, (','.join(matched_users_list), user_id))
+            self.conn.commit()
 
     def dislike_user(self, current_user_id: int, disliked_user_id: int):
         cursor = self.conn.cursor()
