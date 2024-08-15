@@ -470,9 +470,9 @@ class UserProfile:
             INSERT INTO users (name, age, gender, location, interests, liked_users, disliked_users, matches)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (self.name, self.age, self.gender, self.location, ','.join(self.interests),
-            ','.join(map(str, self.liked_users)),
-            ','.join(map(str, self.disliked_users)),
-            ','.join(map(str, self.matched_users))))
+            ','.join(map(str, self.liked_users)) if self.liked_users != [] else None,
+            ','.join(map(str, self.disliked_users)) if self.liked_users != [] else None,
+            ','.join(map(str, self.matched_users))if self.liked_users != [] else None))
         self.user_id = cursor.lastrowid
         conn.commit()
 
@@ -732,7 +732,17 @@ class UserManager:
 
     def recommend_user(self, current_user):
         cursor = self.conn.cursor()
-        recommend = randint(1, current_user.user_id - 1)
+        cursor.execute("""
+            INSERT INTO users (name, age, gender, location, interests, liked_users, disliked_users, matches)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (current_user.name, current_user.age, current_user.gender, current_user.location, ','.join(current_user.interests),
+            ','.join(map(str, current_user.liked_users)) if current_user.liked_users != [] else None,
+            ','.join(map(str, current_user.disliked_users)) if current_user.liked_users != [] else None,
+            ','.join(map(str, current_user.matched_users))if current_user.liked_users != [] else None))
+        print(cursor.lastrowid)
+        recommend = randint(1, cursor.lastrowid-1)
+        if recommend == current_user.user_id:
+            recommend += 1
         while recommend in current_user.liked_users or recommend in current_user.disliked_users:
             recommend = randint(1, current_user.user_id - 1)
         cursor.execute("SELECT * FROM users WHERE user_id = ?", (recommend,))
