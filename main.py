@@ -17,7 +17,7 @@ class GUI:
         self.window = Tk()
         self.window.title("Dating App Name")
         self.canvas = Canvas(height=512, width=512)
-        self.commandcanvas = Canvas(height = 128, width = 512)
+        self.commandcanvas = Canvas(height = 164, width = 512)
         self.logo_png = PhotoImage(file="logo.png")
         self.label = Label(self.window, text="Welcome to (Dating App Name)", font=('Arial', 16))
         self.label.grid(row=0, column=0)
@@ -33,16 +33,27 @@ class GUI:
 
         self.commandcanvas.delete("all")
 
-        self.new_button = Button(self.window, text="New User", font=('Arial', 16), command=self.register_page)
-        self.commandcanvas.create_window(100,30,window=self.new_button)
+        # Function to change the button's appearance on hover
+        def on_enter(e, button):
+            button['background'] = 'lightblue'  # Highlight color
 
+        def on_leave(e, button):
+            button['background'] = 'SystemButtonFace'  # Default color
+
+        # New User button with hover effect
+        self.new_button = Button(self.window, text="New User", font=('Arial', 16), command=self.register_page)
+        self.new_button.bind("<Enter>", lambda e: on_enter(e, self.new_button))
+        self.new_button.bind("<Leave>", lambda e: on_leave(e, self.new_button))
+        self.commandcanvas.create_window(100, 30, window=self.new_button)
+
+        # Existing User button with hover effect
         self.existing_button = Button(self.window, text="Existing User", font=('Arial', 16), command=self.log_in_page)
-        self.commandcanvas.create_window(400,30,window=self.existing_button)
+        self.existing_button.bind("<Enter>", lambda e: on_enter(e, self.existing_button))
+        self.existing_button.bind("<Leave>", lambda e: on_leave(e, self.existing_button))
+        self.commandcanvas.create_window(400, 30, window=self.existing_button)
 
         self.commandcanvas.grid(row=2, column=0)
-        '''
-        self.compare_button = Button(self.window, text="Compare Users", font=('Arial', 16), command=self.compare_users)
-        self.compare_button.grid(row=3, column=1)'''
+
 
     def register_page(self):
         self.label.destroy()
@@ -50,7 +61,8 @@ class GUI:
         self.label.grid(row=0, column=0)
 
         self.canvas.delete("all")
-        #Create user info entry boxes
+
+        # Create user info entry boxes
         self.name_entry = Entry(self.window, font=('Arial', 16), width=24)
         self.age_entry = Entry(self.window, font=('Arial', 16), width=8)
         self.gender = StringVar(self.window)
@@ -63,28 +75,36 @@ class GUI:
         self.canvas.create_window(172, 200, window=self.gender_entry)
         self.canvas.create_window(300, 250, window=self.location_entry)
         self.canvas.create_window(256, 350, window=self.interests_entry)
+        
         self.canvas.create_text(100, 100, text="Name", font=('Arial', 16))
         self.canvas.create_text(100, 150, text="Age", font=('Arial', 16))
         self.canvas.create_text(100, 200, text="Gender", font=('Arial', 16))
         self.canvas.create_text(100, 250, text="Location", font=('Arial', 16))
-        self.canvas.create_text(256, 300, text="Interests (Please separate your interests by comma)",
-                                font=('Arial', 16))
+        self.canvas.create_text(256, 300, text="Interests (Please separate your interests by comma)", font=('Arial', 16))
 
-        #remove buttons from menu page
+        # Remove buttons from menu page
         self.commandcanvas.delete("all")
 
-        self.create_user = Button(self.window, text="Complete My Profile", font=('Arial', 16),
-                                  command=self.check_profile)
-        self.commandcanvas.create_window(400,30,window=self.create_user)
+        # Function to change the button's appearance on hover
+        def on_enter(e, button):
+            button['background'] = 'lightblue'  # Highlight color
 
-        #create new create_user button, check if all entry boxes are filled
+        def on_leave(e, button):
+            button['background'] = 'SystemButtonFace'  # Default color
+
+        # Create user profile button with hover effect
+        self.create_user = Button(self.window, text="Complete My Profile", font=('Arial', 16), command=self.check_profile)
+        self.create_user.bind("<Enter>", lambda e: on_enter(e, self.create_user))
+        self.create_user.bind("<Leave>", lambda e: on_leave(e, self.create_user))
+        self.commandcanvas.create_window(400, 30, window=self.create_user)
+
 
     def log_in_page(self):
         self.label.destroy()
         self.label = Label(self.window, text="Log In to Your Account", font=('Arial', 16))
         self.label.grid(row=0, column=0)
 
-        #Create user log in entry boxes
+        # Create user log in entry boxes
         self.canvas.delete("all")
         self.name_entry = Entry(self.window, font=('Arial', 16), width=24)
         self.id_entry = Entry(self.window, font=('Arial', 16), width=8)
@@ -95,12 +115,21 @@ class GUI:
         self.canvas.create_text(100, 200, text="Name", font=('Arial', 16))
         self.canvas.create_text(100, 150, text="User ID", font=('Arial', 16))
 
-        #Remove buttons from menu page
+        # Remove buttons from the menu page
         self.commandcanvas.delete("all")
 
-        #log in as existing user, check if the user exist
-        self.user_log_in = Button(self.window, text="Log In", font=('Arial', 16), command = self.check_log_in)
-        self.commandcanvas.create_window(400,30,window=self.user_log_in)
+        # Function to change the button's appearance on hover
+        def on_enter(e, button):
+            button['background'] = 'lightblue'  # Highlight color
+
+        def on_leave(e, button):
+            button['background'] = 'SystemButtonFace'  # Default color
+
+        # Log in as existing user, check if the user exists
+        self.user_log_in = Button(self.window, text="Log In", font=('Arial', 16), command=self.check_log_in)
+        self.user_log_in.bind("<Enter>", lambda e: on_enter(e, self.user_log_in))
+        self.user_log_in.bind("<Leave>", lambda e: on_leave(e, self.user_log_in))
+        self.commandcanvas.create_window(400, 30, window=self.user_log_in)
 
 
     def check_profile(self):
@@ -148,7 +177,7 @@ class GUI:
         self.label = Label(self.window, text=f"{current_user.name}, Welcome Back!", font=('Arial', 16))
         self.label.grid(row=0, column=0)
 
-        #clear the canvas to show the user profile details
+        # Clear the canvas to show the user profile details
         self.canvas.delete("all")
 
         self.canvas.create_text(100, 100, text="User ID", font=('Arial', 16))
@@ -168,24 +197,48 @@ class GUI:
         # Remove buttons from previous page
         self.commandcanvas.delete("all")
 
-        # show user options
+        # Function to change the button's appearance on hover
+        def on_enter(e, button):
+            button['background'] = 'lightblue'  # Highlight color
+
+        def on_leave(e, button):
+            button['background'] = 'SystemButtonFace'  # Default color
+
+        # Show user options with hover effects
         self.user_log_out = Button(self.window, text="Log Out", font=('Arial', 16), command=self.menu_page)
+        self.user_log_out.bind("<Enter>", lambda e: on_enter(e, self.user_log_out))
+        self.user_log_out.bind("<Leave>", lambda e: on_leave(e, self.user_log_out))
         self.commandcanvas.create_window(90, 30, window=self.user_log_out)
 
-        self.user_browse = Button(self.window, text="Start Browsing", font=('Arial', 16), command = lambda: self.browse_page(current_user))
-        self.commandcanvas.create_window(230, 30, window=self.user_browse)
+        self.user_browse = Button(self.window, text="        Start Browsing        ", font=('Arial', 16), command=lambda: self.browse_page(current_user))
+        self.user_browse.bind("<Enter>", lambda e: on_enter(e, self.user_browse))
+        self.user_browse.bind("<Leave>", lambda e: on_leave(e, self.user_browse))
+        self.commandcanvas.create_window(230, 140, window=self.user_browse)
 
         self.user_update = Button(self.window, text="Update Profile", font=('Arial', 16))
+        self.user_update.bind("<Enter>", lambda e: on_enter(e, self.user_update))
+        self.user_update.bind("<Leave>", lambda e: on_leave(e, self.user_update))
         self.commandcanvas.create_window(400, 30, window=self.user_update)
 
-        self.user_liked = Button(self.window, text="Liked User", font=('Arial', 16), command = lambda: self.liked_page(current_user))
+        self.user_liked = Button(self.window, text="Liked User", font=('Arial', 16), command=lambda: self.liked_page(current_user))
+        self.user_liked.bind("<Enter>", lambda e: on_enter(e, self.user_liked))
+        self.user_liked.bind("<Leave>", lambda e: on_leave(e, self.user_liked))
         self.commandcanvas.create_window(90, 80, window=self.user_liked)
 
-        self.user_disliked = Button(self.window, text="Disliked User", font=('Arial', 16), command = lambda: self.disliked_page(current_user))
+        self.user_disliked = Button(self.window, text="Disliked User", font=('Arial', 16), command=lambda: self.disliked_page(current_user))
+        self.user_disliked.bind("<Enter>", lambda e: on_enter(e, self.user_disliked))
+        self.user_disliked.bind("<Leave>", lambda e: on_leave(e, self.user_disliked))
         self.commandcanvas.create_window(230, 80, window=self.user_disliked)
 
-        self.user_matched = Button(self.window, text="Matched User", font=('Arial', 16), command = lambda: self.matched_page(current_user))
+        self.user_matched = Button(self.window, text="Matched User", font=('Arial', 16), command=lambda: self.matched_page(current_user))
+        self.user_matched.bind("<Enter>", lambda e: on_enter(e, self.user_matched))
+        self.user_matched.bind("<Leave>", lambda e: on_leave(e, self.user_matched))
         self.commandcanvas.create_window(400, 80, window=self.user_matched)
+
+        self.user_delete = Button(self.window, text="Delete My Profile", font=('Arial', 16), command=lambda: self.matched_page(current_user))
+        self.user_delete.bind("<Enter>", lambda e: on_enter(e, self.user_delete))
+        self.user_delete.bind("<Leave>", lambda e: on_leave(e, self.user_delete))
+        self.commandcanvas.create_window(230, 30, window=self.user_delete)
 
     def browse_page(self, current_user):
         other_user = manager.recommend_user(current_user)
@@ -194,7 +247,7 @@ class GUI:
         self.label = Label(self.window, text=f"You are viewing {other_user.name}'s profile", font=('Arial', 16))
         self.label.grid(row=0, column=0)
 
-        # clear the canvas to show the user profile details
+        # Clear the canvas to show the user profile details
         self.canvas.delete("all")
 
         self.canvas.create_text(100, 150, text="Name", font=('Arial', 16))
@@ -212,14 +265,27 @@ class GUI:
         # Remove buttons from previous page
         self.commandcanvas.delete("all")
 
-        # show user options
-        self.like_button = Button(self.window, text="LIKE", font=('Arial', 16), command = lambda: self.like_user(current_user, other_user))
+        # Function to change the button's appearance on hover
+        def on_enter(e, button):
+            button['background'] = 'lightblue'  # Highlight color
+
+        def on_leave(e, button):
+            button['background'] = 'SystemButtonFace'  # Default color
+
+        # Show user options with hover effects
+        self.like_button = Button(self.window, text="LIKE", font=('Arial', 16), command=lambda: self.like_user(current_user, other_user))
+        self.like_button.bind("<Enter>", lambda e: on_enter(e, self.like_button))
+        self.like_button.bind("<Leave>", lambda e: on_leave(e, self.like_button))
         self.commandcanvas.create_window(90, 30, window=self.like_button)
 
-        self.dislike_button = Button(self.window, text="DISLIKE", font=('Arial', 16), command = lambda: self.dislike_user(current_user, other_user))
+        self.dislike_button = Button(self.window, text="DISLIKE", font=('Arial', 16), command=lambda: self.dislike_user(current_user, other_user))
+        self.dislike_button.bind("<Enter>", lambda e: on_enter(e, self.dislike_button))
+        self.dislike_button.bind("<Leave>", lambda e: on_leave(e, self.dislike_button))
         self.commandcanvas.create_window(230, 30, window=self.dislike_button)
 
-        self.back_to_profile = Button(self.window, text="Back to My Profile", font=('Arial', 16), command = lambda: self.profile_page(current_user))
+        self.back_to_profile = Button(self.window, text="Back to My Profile", font=('Arial', 16), command=lambda: self.profile_page(current_user))
+        self.back_to_profile.bind("<Enter>", lambda e: on_enter(e, self.back_to_profile))
+        self.back_to_profile.bind("<Leave>", lambda e: on_leave(e, self.back_to_profile))
         self.commandcanvas.create_window(400, 30, window=self.back_to_profile)
 
     def display_profile(self, selected_user):
