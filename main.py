@@ -210,10 +210,11 @@ class GUI:
         self.user_log_out.bind("<Leave>", lambda e: on_leave(e, self.user_log_out))
         self.commandcanvas.create_window(90, 30, window=self.user_log_out)
 
-        self.user_browse = Button(self.window, text="        Start Browsing        ", font=('Arial', 16), command=lambda: self.browse_page(current_user))
+        self.user_browse = Button(self.window, text="        Start Browsing        ", font=('Arial', 16), fg='green', command=lambda: self.browse_page(current_user))
         self.user_browse.bind("<Enter>", lambda e: on_enter(e, self.user_browse))
         self.user_browse.bind("<Leave>", lambda e: on_leave(e, self.user_browse))
         self.commandcanvas.create_window(230, 140, window=self.user_browse)
+
 
         self.user_update = Button(self.window, text="Update Profile", font=('Arial', 16))
         self.user_update.bind("<Enter>", lambda e: on_enter(e, self.user_update))
