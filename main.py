@@ -122,7 +122,7 @@ class GUI:
             messagebox.showinfo(title="Oops", message="Age should be a number")
         else:
             #pass the profile to the update_profile function in the UserProfile Class
-            manager.add_user(None, user_name, int(user_age), user_gender, user_location, user_interests.split(','),'','','')
+            manager.add_user(None, user_name, int(user_age), user_gender, user_location, user_interests,None,None,None)
 
     def check_log_in(self):
         user_name = self.name_entry.get()
@@ -328,7 +328,7 @@ class GUI:
         result = manager.dislike_user(current_user.user_id, other_user.user_id)
         if result == True:
             current_user.disliked_users.append(other_user.user_id)
-            messagebox.showinfo(title="I'm SORRY!", message="You DISLIKE has been saved")
+            messagebox.showinfo(title="Thank you!", message="You DISLIKE has been saved")
         else:
             messagebox.showinfo(title="oops!", message="You already disliked this person")
         self.browse_page(current_user)
@@ -458,7 +458,7 @@ class UserManager:
         """)
         self.conn.commit()
 
-    def add_user(self, user_id: Optional[int], name: str, age: int, gender: str, location: str, interests: str, liked_users: str, disliked_users: str, matches_users: str) -> None:
+    def add_user(self, user_id: Optional[int], name: str, age: int, gender: str, location: str, interests: str, liked_users: str, disliked_users: str, matched_users: str) -> None:
         user = UserProfile(user_id, name, age, gender, location, interests, liked_users, disliked_users, matched_users)
         user.save_to_db(self.conn)
         print(f"User {user.user_id} added successfully!")
