@@ -715,11 +715,31 @@ class UserManager:
         else:
             print(f"User ID {user_id} does not exist.")
 
+    #Working delete user method that deletes all instances of the user in the database in liked_users, disliked_users and matches
     def delete_user(self, user_id: int) -> None:
-            cursor = self.conn.cursor()
-            cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
-            self.conn.commit()
-            print(f"User {user_id} deleted successfully!")
+        cursor = self.conn.cursor()
+
+        # Delete the user from the 'users' table
+        cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+        
+        # Remove the user_id from the 'liked_users' column in all users
+        cursor.execute("UPDATE users SET liked_users = REPLACE(liked_users, ?, '') WHERE liked_users LIKE ?", (f',{user_id}', f'%{user_id}%'))
+        cursor.execute("UPDATE users SET liked_users = REPLACE(liked_users, ?, '') WHERE liked_users LIKE ?", (f'{user_id},', f'%{user_id}%'))
+        cursor.execute("UPDATE users SET liked_users = REPLACE(liked_users, ?, '') WHERE liked_users = ?", (f'{user_id}', f'{user_id}'))
+        
+        # Remove the user_id from the 'disliked_users' column in all users
+        cursor.execute("UPDATE users SET disliked_users = REPLACE(disliked_users, ?, '') WHERE disliked_users LIKE ?", (f',{user_id}', f'%{user_id}%'))
+        cursor.execute("UPDATE users SET disliked_users = REPLACE(disliked_users, ?, '') WHERE disliked_users LIKE ?", (f'{user_id},', f'%{user_id}%'))
+        cursor.execute("UPDATE users SET disliked_users = REPLACE(disliked_users, ?, '') WHERE disliked_users = ?", (f'{user_id}', f'{user_id}'))
+        
+        # Remove the user_id from the 'matches' column in all users
+        cursor.execute("UPDATE users SET matches = REPLACE(matches, ?, '') WHERE matches LIKE ?", (f',{user_id}', f'%{user_id}%'))
+        cursor.execute("UPDATE users SET matches = REPLACE(matches, ?, '') WHERE matches LIKE ?", (f'{user_id},', f'%{user_id}%'))
+        cursor.execute("UPDATE users SET matches = REPLACE(matches, ?, '') WHERE matches = ?", (f'{user_id}', f'{user_id}'))
+
+        self.conn.commit()
+        print(f"User {user_id} and all associated references have been deleted successfully!")
+
         
 
     def view_all_users(self) -> None:
