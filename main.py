@@ -162,7 +162,7 @@ class GUI:
         elif user_age.isnumeric() == False:
             messagebox.showinfo(title="Oops", message="Age should be a number")
         else:
-            manager.add_user(None, user_name, int(user_age), user_gender, user_location, user_interests,None,None,None)
+            manager.add_user(None, user_name, int(user_age), user_gender, user_location, user_interests)
 
     def check_log_in(self):
         user_name = self.name_entry.get()
@@ -513,7 +513,7 @@ class GUI:
 class UserProfile:
     def __init__(self, user_id: int, name: str, age: int, gender: str, location: str, interests: str,
                  liked_users: Optional[str] = None, disliked_users: Optional[str] = None,
-                 matched_users: Optional[str] = None) -> None:
+                 matched_users: Optional[str] = None):
         self.user_id = user_id
         self.name = name
         self.age = age
@@ -555,10 +555,7 @@ class UserProfile:
         cursor.execute("""
             INSERT INTO users (name, age, gender, location, interests, liked_users, disliked_users, matches)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (self.name, self.age, self.gender, self.location, ','.join(self.interests),
-            ','.join(map(str, self.liked_users)) if self.liked_users is not [] else None,
-            ','.join(map(str, self.disliked_users)) if self.disliked_users is not [] else None,
-            ','.join(map(str, self.matched_users))if self.matched_users is not [] else None))
+        """, (self.name, self.age, self.gender, self.location, ','.join(self.interests),None,None,None))
         self.user_id = cursor.lastrowid
         conn.commit()
 
@@ -656,8 +653,8 @@ class UserManager:
             self.commandcanvas.create_window(300, 80, window=self.back_to_profile)
 
 
-    def add_user(self, user_id: Optional[int], name: str, age: int, gender: str, location: str, interests: str, liked_users: str, disliked_users: str, matched_users: str) -> None:
-        user = UserProfile(user_id, name, age, gender, location, interests, liked_users, disliked_users, matched_users)
+    def add_user(self, user_id: Optional[int], name: str, age: int, gender: str, location: str, interests: str):
+        user = UserProfile(user_id, name, age, gender, location, interests)
         user.save_to_db(self.conn)
         print(f"User {user.user_id} added successfully!")
         UI.profile_page(user)
@@ -947,5 +944,4 @@ if __name__ == "__main__":
     UI.menu_page()
 
     UI.window.mainloop()
-
 #Load All Users into a Pandas DataFrame
