@@ -98,6 +98,13 @@ class GUI:
         self.create_user.bind("<Leave>", lambda e: on_leave(e, self.create_user))
         self.commandcanvas.create_window(400, 30, window=self.create_user)
 
+        self.back_to_menu = Button(self.window, text="Back To Menu", font=('Arial', 16),
+                                  command=self.menu_page)
+        self.back_to_menu.bind("<Enter>", lambda e: on_enter(e, self.back_to_menu))
+        self.back_to_menu.bind("<Leave>", lambda e: on_leave(e, self.back_to_menu))
+        self.commandcanvas.create_window(130, 30, window=self.back_to_menu)
+
+
 
     def log_in_page(self):
         self.label.destroy()
@@ -131,6 +138,11 @@ class GUI:
         self.user_log_in.bind("<Leave>", lambda e: on_leave(e, self.user_log_in))
         self.commandcanvas.create_window(400, 30, window=self.user_log_in)
 
+        self.back_to_menu = Button(self.window, text="Back To Menu", font=('Arial', 16),
+                                  command=self.menu_page)
+        self.back_to_menu.bind("<Enter>", lambda e: on_enter(e, self.back_to_menu))
+        self.back_to_menu.bind("<Leave>", lambda e: on_leave(e, self.back_to_menu))
+        self.commandcanvas.create_window(130, 30, window=self.back_to_menu)
 
     def check_profile(self):
         user_name = self.name_entry.get()
@@ -150,7 +162,6 @@ class GUI:
         elif user_age.isnumeric() == False:
             messagebox.showinfo(title="Oops", message="Age should be a number")
         else:
-            #pass the profile to the update_profile function in the UserProfile Class
             manager.add_user(None, user_name, int(user_age), user_gender, user_location, user_interests,None,None,None)
 
     def check_log_in(self):
@@ -168,9 +179,6 @@ class GUI:
                 messagebox.showinfo(title="Oops", message="User does not exist")
             else:
                 self.profile_page(user_result)
-
-
-
 
     def profile_page(self, current_user):
         self.label.destroy()
@@ -216,7 +224,7 @@ class GUI:
         self.commandcanvas.create_window(230, 140, window=self.user_browse)
 
 
-        self.user_update = Button(self.window, text="Update Profile", font=('Arial', 16))
+        self.user_update = Button(self.window, text="Update Profile", font=('Arial', 16), command=lambda: self.update_page(current_user))
         self.user_update.bind("<Enter>", lambda e: on_enter(e, self.user_update))
         self.user_update.bind("<Leave>", lambda e: on_leave(e, self.user_update))
         self.commandcanvas.create_window(400, 30, window=self.user_update)
@@ -354,7 +362,87 @@ class GUI:
                                       command=lambda: self.profile_page(current_user))
         self.commandcanvas.create_window(300, 80, window=self.back_to_profile)
 
-    
+    def update_page(self, current_user):
+        self.label.destroy()
+        self.label = Label(self.window, text="Please update your profile", font=('Arial', 16))
+        self.label.grid(row=0, column=0)
+
+        # Clear the canvas to show the user profile details
+        self.canvas.delete("all")
+
+        self.canvas.create_text(100, 100, text="User ID", font=('Arial', 16))
+        self.canvas.create_text(100, 150, text="Name", font=('Arial', 16))
+        self.canvas.create_text(100, 200, text="Age", font=('Arial', 16))
+        self.canvas.create_text(100, 250, text="Gender", font=('Arial', 16))
+        self.canvas.create_text(100, 300, text="Location", font=('Arial', 16))
+        self.canvas.create_text(256, 350, text="Interests", font=('Arial', 16))
+
+        self.name_entry = Entry(self.window, font=('Arial', 16), width=8)
+        self.age_entry = Entry(self.window, font=('Arial', 16), width=8)
+        self.gender = StringVar(self.window)
+        self.gender_entry = OptionMenu(self.window, self.gender, "M", "F")
+        self.location_entry = Entry(self.window, font=('Arial', 16), width=24)
+        self.interests_entry = Entry(self.window, font=('Arial', 16), width=36)
+
+        #Set user's current info as default in the text boxes
+        self.name_entry.insert(0,current_user.name)
+        self.age_entry.insert(0,current_user.age)
+        self.gender.set(current_user.gender)
+        self.location_entry.insert(0, current_user.location)
+        self.interests_entry.insert(0, ','.join(current_user.interests))
+
+        self.canvas.create_text(200, 100, text=current_user.user_id, font=('Arial', 16))
+        self.canvas.create_window(204, 150, window=self.name_entry)
+        self.canvas.create_window(204, 200, window=self.age_entry)
+        self.canvas.create_window(172, 250, window=self.gender_entry)
+        self.canvas.create_window(300, 300, window=self.location_entry)
+        self.canvas.create_window(256, 400, window=self.interests_entry)
+
+        # Remove buttons from the menu page
+        self.commandcanvas.delete("all")
+
+        # Function to change the button's appearance on hover
+        def on_enter(e, button):
+            button['background'] = 'lightblue'  # Highlight color
+
+        def on_leave(e, button):
+            button['background'] = 'SystemButtonFace'  # Default color
+
+        # Log in as existing user, check if the user exists
+        self.user_update = Button(self.window, text="Update", font=('Arial', 16), command=lambda: self.check_update(current_user))
+        self.user_update.bind("<Enter>", lambda e: on_enter(e, self.user_update))
+        self.user_update.bind("<Leave>", lambda e: on_leave(e, self.user_update))
+        self.commandcanvas.create_window(400, 30, window=self.user_update)
+
+        self.back_to_profile = Button(self.window, text="Back To Menu", font=('Arial', 16),
+                                   command= lambda: self.profile_page(current_user))
+        self.back_to_profile.bind("<Enter>", lambda e: on_enter(e, self.back_to_profile))
+        self.back_to_profile.bind("<Leave>", lambda e: on_leave(e, self.back_to_profile))
+        self.commandcanvas.create_window(130, 30, window=self.back_to_profile)
+
+    def check_update(self, current_user):
+        user_name = self.name_entry.get()
+        user_age = self.age_entry.get()
+        user_gender = self.gender.get()
+        user_location = self.location_entry.get()
+        user_interests = self.interests_entry.get()
+
+        user_profile = [user_name, user_age, user_gender, user_location, user_interests]
+        complete = True
+        for info in user_profile:
+            if len(info) == 0:
+                complete = False
+                break
+        if not complete:
+            messagebox.showinfo(title="Oops", message="Please make sure you fill all the boxes")
+        elif user_age.isnumeric() == False:
+            messagebox.showinfo(title="Oops", message="Age should be a number")
+        else:
+            manager.update_user(current_user, user_name, int(user_age), user_gender, user_location, user_interests)
+            messagebox.showinfo(title="Done!", message="Your profile has been successfully updated")
+            user_result = manager.user_exists(current_user.user_id, user_name)
+            self.profile_page(user_result)
+
     def delete_current_user(self, current_user):
             confirmation = messagebox.askyesno("Delete Profile", "Are you sure you want to delete your profile?")
             if confirmation:
@@ -390,17 +478,15 @@ class GUI:
                                       command=lambda: self.profile_page(current_user))
         self.commandcanvas.create_window(300, 80, window=self.back_to_profile)
 
-
-
-
-        
-
     def like_user(self, current_user, other_user):
+        #The returned result is a list of booleans, first indicate if this person is already liked, second indicate if this person is matched
         result = manager.like_user(current_user.user_id, other_user.user_id)
-        print(result)
-        if result == True:
+
+        if result[0] == True:
             current_user.liked_users.append(other_user.user_id)
             messagebox.showinfo(title="Thank you!", message="You LIKE has been saved")
+            if result[1] == True:
+                current_user.matched_users.append(other_user.user_id)
         else:
             messagebox.showinfo(title="oops!", message="You already liked this person")
         self.browse_page(current_user)
@@ -470,12 +556,14 @@ class UserProfile:
             INSERT INTO users (name, age, gender, location, interests, liked_users, disliked_users, matches)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (self.name, self.age, self.gender, self.location, ','.join(self.interests),
-            ','.join(map(str, self.liked_users)) if self.liked_users != [] else None,
-            ','.join(map(str, self.disliked_users)) if self.liked_users != [] else None,
-            ','.join(map(str, self.matched_users))if self.liked_users != [] else None))
+            ','.join(map(str, self.liked_users)) if self.liked_users is not [] else None,
+            ','.join(map(str, self.disliked_users)) if self.disliked_users is not [] else None,
+            ','.join(map(str, self.matched_users))if self.matched_users is not [] else None))
         self.user_id = cursor.lastrowid
         conn.commit()
 
+    #This function is not needed, user update function in UserManager Class
+    '''
     def update_profile(self, conn: sqlite3.Connection, name: Optional[str] = None, age: Optional[int] = None,
                     gender: Optional[str] = None, location: Optional[str] = None,
                     interests: Optional[List[str]] = None, liked_users: Optional[List[int]] = None,
@@ -515,7 +603,7 @@ class UserProfile:
     def view_profile(self) -> None:
         print(f"ID: {self.user_id}, Name: {self.name}, Age: {self.age}, "
               f"Gender: {self.gender}, Location: {self.location}, "
-              f"Interests: {', '.join(self.interests)}")
+              f"Interests: {', '.join(self.interests)}")'''
         
 class UserManager:
     def __init__(self, db_path: str) -> None:
@@ -610,9 +698,11 @@ class UserManager:
                 self._add_to_matches(current_user_id, liked_user_id)
                 self._add_to_matches(liked_user_id, current_user_id)
                 messagebox.showinfo(title="It's a Match!", message="You have a new match!")
-            return True
+                return [True, True]
+            else:
+                return [True, False]
         else:
-            return False
+            return [False, False]
 
     def _add_to_matches(self, user_id: int, matched_user_id: int):
         cursor = self.conn.cursor()
@@ -684,26 +774,22 @@ class UserManager:
         else:
             print("One or both user IDs do not exist.")
 
-    def update_user(self, user_id: int, name: Optional[str] = None, age: Optional[int] = None, gender: Optional[str] = None, 
-                    location: Optional[str] = None, interests: Optional[List[str]] = None) -> None:
-        if self.user_exists(user_id):
-            cursor = self.conn.cursor()
-            cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
-            row = cursor.fetchone()
-            user = UserProfile(row[0], row[1], row[2], row[3], row[4], row[5],row[6],row[7],row[8])
-            if name is not None:
-                user.name = name
-            if age is not None:
-                user.age = age
-            if gender is not None:
-                user.gender = gender
-            if location is not None:
-                user.location = location
-            if interests is not None:
-                user.interests = interests
-            user.update_profile(self.conn, user.name, user.age, user.gender, user.location, user.interests)
-        else:
-            print(f"User ID {user_id} does not exist.")
+    def update_user(self, current_user, name, age, gender, location, interests):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE user_id = ?", (current_user.user_id,))
+        row = cursor.fetchone()
+
+        cursor.execute("""
+                        UPDATE users
+                        SET name = ?, age = ?, gender = ?, location = ?, interests = ?, liked_users = ?, disliked_users = ?, matches = ?
+                        WHERE user_id = ?
+                    """, (name, age, gender, location, interests,
+                          ','.join(map(str, current_user.liked_users)) if len(current_user.liked_users) != 0 else None,
+                          ','.join(map(str, current_user.disliked_users))if len(current_user.disliked_users) != 0 else None,
+                          ','.join(map(str, current_user.matched_users))if len(current_user.matched_users) != 0 else None,
+                          current_user.user_id))
+        self.conn.commit()
+
 
     def view_user(self, user_id: int) -> None:
         if self.user_exists(user_id):
@@ -752,15 +838,9 @@ class UserManager:
 
     def recommend_user(self, current_user):
         cursor = self.conn.cursor()
-        cursor.execute("""
-            INSERT INTO users (name, age, gender, location, interests, liked_users, disliked_users, matches)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (current_user.name, current_user.age, current_user.gender, current_user.location, ','.join(current_user.interests),
-            ','.join(map(str, current_user.liked_users)) if current_user.liked_users != [] else None,
-            ','.join(map(str, current_user.disliked_users)) if current_user.liked_users != [] else None,
-            ','.join(map(str, current_user.matched_users))if current_user.liked_users != [] else None))
-        print(cursor.lastrowid)
-        recommend = randint(1, cursor.lastrowid-1)
+        cursor.execute("SELECT * FROM users ORDER BY user_id DESC LIMIT 1")
+        last_user = cursor.fetchone()
+        recommend = randint(1, last_user[0])
         if recommend == current_user.user_id:
             recommend += 1
         while recommend in current_user.liked_users or recommend in current_user.disliked_users:
