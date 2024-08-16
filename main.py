@@ -15,16 +15,16 @@ import numpy as np
 class GUI:
     def __init__(self):
         self.window = Tk()
-        self.window.title("Dating App Name")
+        self.window.title("Matching U")
         self.canvas = Canvas(height=512, width=512)
         self.commandcanvas = Canvas(height = 164, width = 512)
         self.logo_png = PhotoImage(file="logo.png")
-        self.label = Label(self.window, text="Welcome to (Dating App Name)", font=('Arial', 16))
+        self.label = Label(self.window, text="Welcome to Matching U", font=('Arial', 16))
         self.label.grid(row=0, column=0)
 
     def menu_page(self):
         self.label.destroy()
-        self.label = Label(self.window, text="Welcome to (Dating App Name)", font=('Arial', 16))
+        self.label = Label(self.window, text="Welcome to Matching U", font=('Arial', 16))
         self.label.grid(row=0, column=0)
 
         self.canvas.delete("all")
