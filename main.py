@@ -512,17 +512,17 @@ class GUI:
 
 class UserProfile:
     def __init__(self, user_id: int, name: str, age: int, gender: str, location: str, interests: str,
-                 liked_users: Optional[str] = None, disliked_users: Optional[str] = None,
-                 matched_users: Optional[str] = None):
+                 liked_users: Optional[str] = '', disliked_users: Optional[str] = '',
+                 matched_users: Optional[str] = ''):
         self.user_id = user_id
         self.name = name
         self.age = age
         self.gender = gender
         self.location = location
         self.interests = interests.split(',')
-        self.liked_users = list(map(int,liked_users.split(','))) if liked_users is not None else []
-        self.disliked_users = list(map(int,disliked_users.split(','))) if disliked_users is not None else []
-        self.matched_users = list(map(int,matched_users.split(','))) if matched_users is not None else []
+        self.liked_users = list(map(int,liked_users.split(','))) if liked_users != '' else []
+        self.disliked_users = list(map(int,disliked_users.split(','))) if disliked_users != '' else []
+        self.matched_users = list(map(int,matched_users.split(','))) if matched_users != '' else []
         self.geolocator = Nominatim(user_agent="dating_app")
 
 
@@ -555,7 +555,7 @@ class UserProfile:
         cursor.execute("""
             INSERT INTO users (name, age, gender, location, interests, liked_users, disliked_users, matches)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (self.name, self.age, self.gender, self.location, ','.join(self.interests),None,None,None))
+        """, (self.name, self.age, self.gender, self.location, ','.join(self.interests),'','',''))
         self.user_id = cursor.lastrowid
         conn.commit()
 
@@ -781,9 +781,9 @@ class UserManager:
                         SET name = ?, age = ?, gender = ?, location = ?, interests = ?, liked_users = ?, disliked_users = ?, matches = ?
                         WHERE user_id = ?
                     """, (name, age, gender, location, interests,
-                          ','.join(map(str, current_user.liked_users)) if len(current_user.liked_users) != 0 else None,
-                          ','.join(map(str, current_user.disliked_users))if len(current_user.disliked_users) != 0 else None,
-                          ','.join(map(str, current_user.matched_users))if len(current_user.matched_users) != 0 else None,
+                          ','.join(map(str, current_user.liked_users)) if len(current_user.liked_users) != 0 else '',
+                          ','.join(map(str, current_user.disliked_users))if len(current_user.disliked_users) != 0 else '',
+                          ','.join(map(str, current_user.matched_users))if len(current_user.matched_users) != 0 else '',
                           current_user.user_id))
         self.conn.commit()
 
@@ -804,21 +804,24 @@ class UserManager:
 
         # Delete the user from the 'users' table
         cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
-        
+
         # Remove the user_id from the 'liked_users' column in all users
         cursor.execute("UPDATE users SET liked_users = REPLACE(liked_users, ?, '') WHERE liked_users LIKE ?", (f',{user_id}', f'%{user_id}%'))
         cursor.execute("UPDATE users SET liked_users = REPLACE(liked_users, ?, '') WHERE liked_users LIKE ?", (f'{user_id},', f'%{user_id}%'))
         cursor.execute("UPDATE users SET liked_users = REPLACE(liked_users, ?, '') WHERE liked_users = ?", (f'{user_id}', f'{user_id}'))
-        
-        # Remove the user_id from the 'disliked_users' column in all users
+        # Set the 'liked_users' column
+
+    # Remove the user_id from the 'disliked_users' column in all users
         cursor.execute("UPDATE users SET disliked_users = REPLACE(disliked_users, ?, '') WHERE disliked_users LIKE ?", (f',{user_id}', f'%{user_id}%'))
         cursor.execute("UPDATE users SET disliked_users = REPLACE(disliked_users, ?, '') WHERE disliked_users LIKE ?", (f'{user_id},', f'%{user_id}%'))
         cursor.execute("UPDATE users SET disliked_users = REPLACE(disliked_users, ?, '') WHERE disliked_users = ?", (f'{user_id}', f'{user_id}'))
-        
+
+
         # Remove the user_id from the 'matches' column in all users
         cursor.execute("UPDATE users SET matches = REPLACE(matches, ?, '') WHERE matches LIKE ?", (f',{user_id}', f'%{user_id}%'))
         cursor.execute("UPDATE users SET matches = REPLACE(matches, ?, '') WHERE matches LIKE ?", (f'{user_id},', f'%{user_id}%'))
         cursor.execute("UPDATE users SET matches = REPLACE(matches, ?, '') WHERE matches = ?", (f'{user_id}', f'{user_id}'))
+
 
         self.conn.commit()
         print(f"User {user_id} and all associated references have been deleted successfully!")
