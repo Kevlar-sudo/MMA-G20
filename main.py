@@ -876,8 +876,15 @@ def compute_compatibility_scores(logged_in_user, users_df):
     # exclude yourself
     potential_matches = users_df[users_df['user_id'] != logged_in_user.user_id].copy()
     # Calculate **location** compatibility score using a boolean mask and convert to float
-    potential_matches['location_score'] = (potential_matches['location'] == logged_in_user.location).astype(
-        float)
+    # original approach
+    # potential_matches['location_score'] = (potential_matches['location'] == logged_in_user.location).astype(
+    #    float)
+
+    # updated Calculated **location** compatibility score -> use Geo-location
+    potential_coordinate = calculate_compatibility(potential_matches, logged_in_user)
+    logged_in_coordinate = calculate_compatibility(logged_in_user, potential_coordinate)
+    potential_matches['location_score'] = 1 / (1 + np.abs(potential_coordinate - logged_in_coordinate))
+    
     # Alternative is to go over location by location and set to 1.0 when matches and 0.0 if doesn't
     # more creative: use Geo-location (so convert address to GPS point)
 
