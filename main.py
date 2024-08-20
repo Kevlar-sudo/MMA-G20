@@ -902,14 +902,9 @@ def compute_compatibility_scores(logged_in_user, users_df):
         intersection = len(logged_in_interests_set & interests_set)
         union = len(logged_in_interests_set | interests_set)
         return intersection/union if union > 0 else 0
-        
-    potential_matches['interests_score'] = potential_matches['interests'].apply(calculate_interest_similarity)
     
-    # Convert **interests** lists into a set for the logged-in user for faster comparison
-    # logged_in_interests_set = set(logged_in_user.interests)
-
-    # Optimize shared interests score calculation using list comprehension and apply
-    # def calculate_jaccard_similarity_vectorized(interests):
+    # Apply the vectorized Jaccard similarity calculation to all potential matches    
+    potential_matches['interests_score'] = potential_matches['interests'].apply(calculate_interest_similarity)
 
                 # Calculate intersection and union sizes directly
              
@@ -932,15 +927,12 @@ def compute_compatibility_scores(logged_in_user, users_df):
         # Return the Jaccard similarity score
         #return intersection_size / union_size if union_size > 0 else 0
 
-    # Apply the vectorized Jaccard similarity calculation to all potential matches
-    potential_matches['interests_score'] = potential_matches['interests'].apply(
-        calculate_jaccard_similarity_vectorized)
-
     # Combine the individual scores into a final compatibility score using NumPy's vectorized operations
     potential_matches['compatibility_score'] = (
-             0.25 * potential_matches['location_score'] +
-            0.5 * potential_matches['age_diff_score'] +
-            0.25 * potential_matches['interests_score'])
+        0.25 * potential_matches['location_score'] +
+        0.5 * potential_matches['age_diff_score'] +
+        0.25 * potential_matches['interests_score']
+        )
     #may update with kevin's code later
    
   
