@@ -882,9 +882,9 @@ def compute_compatibility_scores(logged_in_user, users_df):
 
     # updated Calculated **location** compatibility score -> use Geo-location
     potential_coordinate = calculate_compatibility(potential_matches, logged_in_user)
-    logged_in_coordinate = calculate_compatibility(logged_in_user, potential_coordinate)
+    logged_in_coordinate = calculate_compatibility(logged_in_user, potential_matches)
     potential_matches['location_score'] = 1 / (1 + np.abs(potential_coordinate - logged_in_coordinate))
-    
+
     # Alternative is to go over location by location and set to 1.0 when matches and 0.0 if doesn't
     # more creative: use Geo-location (so convert address to GPS point)
 
