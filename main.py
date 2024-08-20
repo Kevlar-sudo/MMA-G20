@@ -836,50 +836,62 @@ class UserManager:
             user = UserProfile(row[0], row[1], row[2], row[3], row[4], row[5],row[6],row[7],row[8])
             user.view_profile()
 
+    #This function gets the current user info from the browse_page function in the GUI class, and returned the eligible user with the highest compatibility score, if no other users are eligible (current user viewed all the existing profiles), this function returns False.
     def recommend_user(self, current_user):
         cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM users ORDER BY user_id DESC LIMIT 1")
-        last_user = cursor.fetchone()
-        recommend = randint(1, last_user[0])
-        if recommend == current_user.user_id:
-            recommend += 1
-        while recommend in current_user.liked_users or recommend in current_user.disliked_users:
-            recommend = randint(1, current_user.user_id - 1)
-        cursor.execute("SELECT * FROM users WHERE user_id = ?", (recommend,))
-        row = cursor.fetchone()
-        other_user = UserProfile(row[0], row[1], row[2], row[3], row[4], row[5],row[6],row[7],row[8])
-        return other_user
+        df = self.fetch_all_users()
+        eligible_users = []
+        #exclude current user himself/herself, users in current user's liked and disliked list, and get a list of eligible users
+        for ind in df.index:
+            if df["user_id"][ind] in current_user.liked_users or df["user_id"][ind] in current_user.disliked_users or df["user_id"][ind] == current_user.user_id:
+                continue
+            else:
+                eligible_users.append(df["user_id"][ind])
+        #check if there are eligible users
+        if len(eligible_users) == 0:
+            return False
+        else:
+            compute_compatibility_score(current_user, df[df["user_id"].isin(eligible_users)])
+        #cursor.execute("SELECT * FROM users WHERE user_id = ?", (recommend,))
+        #row = cursor.fetchone()
+        #other_user = UserProfile(row[0], row[1], row[2], row[3], row[4], row[5],row[6],row[7],row[8])
+        return False
 
 
 
-def fetch_all_users():
-    conn = sqlite3.connect('users.db')
-    global df
-    df = pd.read_sql_query("SELECT * FROM users", conn)
-    # Convert each comma-separated string in the 'interests' column to a list of interests
-    df['interests'] = df['interests'].apply(
-        lambda x: x.split(',') if x else [])
-        # lambda x:        -> Defines an anonymous function with 'x' as the input (each element in the 'interests' column)
-        # x.split(',')     -> Splits the string 'x' by commas into a list (e.g., "hiking,reading" becomes ['hiking', 'reading'])
-        # if x             -> Checks if 'x' is not empty or None. If 'x' has content, split it by commas.
-        # else []          -> If 'x' is empty or None, return an empty list instead of trying to split 'x'
+    def fetch_all_users(self):
+        df = pd.read_sql_query("SELECT * FROM users", self.conn)
+        # Convert each comma-separated string in the 'interests' column to a list of interests
+        df['interests'] = df['interests'].apply(
+            lambda x: x.split(',') if x else [])
+            # lambda x:        -> Defines an anonymous function with 'x' as the input (each element in the 'interests' column)
+            # x.split(',')     -> Splits the string 'x' by commas into a list (e.g., "hiking,reading" becomes ['hiking', 'reading'])
+            # if x             -> Checks if 'x' is not empty or None. If 'x' has content, split it by commas.
+            # else []          -> If 'x' is empty or None, return an empty list instead of trying to split 'x'
+        df['liked_users'] = df['liked_users'].apply(
+            lambda x: map(int, x.split(',')) if x else [])
+        df['disliked_users'] = df['disliked_users'].apply(
+            lambda x: map(int, x.split(',')) if x else [])
+        df['matches'] = df['matches'].apply(
+            lambda x: map(int, x.split(',')) if x else [])
 
-    conn.close()
-    return df
+        self.conn.close()
+        return df
 
        
 
 
-# Compute Compatibility Scores
-def compute_compatibility_scores(logged_in_user, users_df):
+# Compute Compatibility Scores (compute the score of the current user and the other eligible user)
+
+def compute_compatibility_score(logged_in_user, potential_matches):
     # Exclude the logged-in user from potential matches
     # exclude yourself
-    potential_matches = users_df[users_df['user_id'] != logged_in_user.user_id].copy()
+    #potential_matches = users_df[users_df['user_id'] != logged_in_user.user_id].copy()
     # Calculate **location** compatibility score using a boolean mask and convert to float
     # original approach
     # potential_matches['location_score'] = (potential_matches['location'] == logged_in_user.location).astype(
     #    float)
-
+    print(potential_matches)
     # updated Calculated **location** compatibility score -> use Geo-location
     potential_coordinate = calculate_compatibility(potential_matches, logged_in_user)
     logged_in_coordinate = calculate_compatibility(logged_in_user, potential_matches)
@@ -905,7 +917,7 @@ def compute_compatibility_scores(logged_in_user, users_df):
         union = len(logged_in_interests_set | interests_set)
         return intersection/union if union > 0 else 0
         
-    potential_matches['interests_score'] = potential_matches['interests'].apply(calculate_interest_similarity)
+    #potential_matches['interests_score'] = potential_matches['interests'].apply(calculate_interest_similarity)
     
     # Convert **interests** lists into a set for the logged-in user for faster comparison
     # logged_in_interests_set = set(logged_in_user.interests)
@@ -975,8 +987,17 @@ if __name__ == "__main__":
     '''
 
 
-    UI = GUI()
-    UI.menu_page()
+    #UI = GUI()
+    #UI.menu_page()
 
-    UI.window.mainloop()
+    #UI.window.mainloop()
+
+    #Test Code
+    #use a user in database to test the recommend function
+    user = manager.user_exists(int(5), "Cindy")
+    other_user = manager.recommend_user(user)
+    if other_user:
+        print(other_user.name)
+    else:
+        print("None")
 #Load All Users into a Pandas DataFrame
