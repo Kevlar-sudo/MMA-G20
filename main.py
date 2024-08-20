@@ -867,7 +867,10 @@ def fetch_all_users():
     conn.close()
     return df
 
-        # Compute Compatibility Scores
+       
+
+
+# Compute Compatibility Scores
 def compute_compatibility_scores(logged_in_user, users_df):
     # Exclude the logged-in user from potential matches
     # exclude yourself
@@ -883,31 +886,46 @@ def compute_compatibility_scores(logged_in_user, users_df):
     # Calculate **age** difference score using NumPy's vectorized operations
     potential_matches['age_diff_score'] = 1 / (1 + np.abs(potential_matches['age'] - logged_in_user.age))
 
-    # Convert **interests** lists into a set for the logged-in user for faster comparison
+    #INTEREST SCORE
+
+    # Convert interests lists into a set for the logged-in user for faster comparison
     logged_in_interests_set = set(logged_in_user.interests)
 
     # Optimize shared interests score calculation using list comprehension and apply
-    def calculate_jaccard_similarity_vectorized(interests):
+    def calculate_interest_similarity(interests):
+        interests_set = set(interests)
+        intersection = len(logged_in_interests_set & interests_set)
+        union = len(logged_in_interests_set | interests_set)
+        return intersection/union if union > 0 else 0
+        
+    potential_matches['interests_score'] = potential_matches['interests'].apply(calculate_interest_similarity)
+    
+    # Convert **interests** lists into a set for the logged-in user for faster comparison
+    # logged_in_interests_set = set(logged_in_user.interests)
+
+    # Optimize shared interests score calculation using list comprehension and apply
+    # def calculate_jaccard_similarity_vectorized(interests):
 
                 # Calculate intersection and union sizes directly
-        category = []
-        for interest in df["interests"]:
-            if interest in ["cycling", "hiking", "swimming", "dancing", "running", "sports", "yoga"]:
-                category.append("Sports")
-            elif interest in ["music", "art", "painting"]:
-                category.append("Art")
-            elif interest in ["gardening", "fishing", "photography", "travelling", "cooking"]:
-                category.append("Lifestyle")
-            elif interest in ["reading", "coding", "writing", "gaming"]:
-                category.append("Intellectual")
+             
+        #category = []
+        #for interest in df["interests"]:
+            #if interest in ["cycling", "hiking", "swimming", "dancing", "running", "sports", "yoga"]:
+                #category.append("Sports")
+            #elif interest in ["music", "art", "painting"]:
+                #category.append("Art")
+            #elif interest in ["gardening", "fishing", "photography", "travelling", "cooking"]:
+                #category.append("Lifestyle")
+            #elif interest in ["reading", "coding", "writing", "gaming"]:
+                #category.append("Intellectual")
 
-        category_set = set(category)
-        logged_in_category_set = set(logged_in_user.category)
-        intersection_size = len(logged_in_category_set & category_set)
-        union_size = len(logged_in_category_set | category_set)
+        #category_set = set(category)
+        #logged_in_category_set = set(logged_in_user.category)
+        #intersection_size = len(logged_in_category_set & category_set)
+        #union_size = len(logged_in_category_set | category_set)
 
         # Return the Jaccard similarity score
-        return intersection_size / union_size if union_size > 0 else 0
+        #return intersection_size / union_size if union_size > 0 else 0
 
     # Apply the vectorized Jaccard similarity calculation to all potential matches
     potential_matches['interests_score'] = potential_matches['interests'].apply(
@@ -930,6 +948,7 @@ def display_top_matches(potential_matches, top_n=3):
     print("Top Matches:")
     print(top_matches)
     return top_matches
+
 
 
 if __name__ == "__main__":
