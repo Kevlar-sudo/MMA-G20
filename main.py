@@ -893,9 +893,7 @@ def compute_compatibility_score(logged_in_user, potential_matches):
     #    float)
     print(potential_matches)
     # updated Calculated **location** compatibility score -> use Geo-location
-    potential_coordinate = calculate_compatibility(potential_matches, logged_in_user)
-    logged_in_coordinate = calculate_compatibility(logged_in_user, potential_matches)
-    potential_matches['location_score'] = 1 / (1 + np.abs(potential_coordinate - logged_in_coordinate))
+    potential_matches['location_score'] = calculate_compatibility(logged_in_user, potential_matches)
 
     # Alternative is to go over location by location and set to 1.0 when matches and 0.0 if doesn't
     # more creative: use Geo-location (so convert address to GPS point)
@@ -919,11 +917,8 @@ def compute_compatibility_score(logged_in_user, potential_matches):
         
     #potential_matches['interests_score'] = potential_matches['interests'].apply(calculate_interest_similarity)
     
-    # Convert **interests** lists into a set for the logged-in user for faster comparison
-    # logged_in_interests_set = set(logged_in_user.interests)
-
-    # Optimize shared interests score calculation using list comprehension and apply
-    # def calculate_jaccard_similarity_vectorized(interests):
+    # Apply the vectorized Jaccard similarity calculation to all potential matches    
+    potential_matches['interests_score'] = potential_matches['interests'].apply(calculate_interest_similarity)
 
                 # Calculate intersection and union sizes directly
              
@@ -946,15 +941,12 @@ def compute_compatibility_score(logged_in_user, potential_matches):
         # Return the Jaccard similarity score
         #return intersection_size / union_size if union_size > 0 else 0
 
-    # Apply the vectorized Jaccard similarity calculation to all potential matches
-    potential_matches['interests_score'] = potential_matches['interests'].apply(
-        calculate_jaccard_similarity_vectorized)
-
     # Combine the individual scores into a final compatibility score using NumPy's vectorized operations
     potential_matches['compatibility_score'] = (
-             0.25 * potential_matches['location_score'] +
-            0.5 * potential_matches['age_diff_score'] +
-            0.25 * potential_matches['interests_score'])
+        0.25 * potential_matches['location_score'] +
+        0.5 * potential_matches['age_diff_score'] +
+        0.25 * potential_matches['interests_score']
+        )
     #may update with kevin's code later
    
   
