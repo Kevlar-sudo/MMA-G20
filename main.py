@@ -940,9 +940,15 @@ def compute_compatibility_scores(logged_in_user, users_df):
 
     # Combine the individual scores into a final compatibility score using NumPy's vectorized operations
     potential_matches['compatibility_score'] = (
-             0.4 * potential_matches['location_score'] +
-            0.3 * potential_matches['age_diff_score'] +
-            0.3 * potential_matches['interests_score'])
+             0.25 * potential_matches['location_score'] +
+            0.5 * potential_matches['age_diff_score'] +
+            0.25 * potential_matches['interests_score'])
+    #may update with kevin's code later
+   
+  
+
+
+    
 
     # Sort by the compatibility score in descending order
     potential_matches = potential_matches.sort_values(by='compatibility_score', ascending=False)
