@@ -914,8 +914,11 @@ def compute_compatibility_score(logged_in_user, potential_matches):
         intersection = len(logged_in_interests_set & interests_set)
         union = len(logged_in_interests_set | interests_set)
         return intersection/union if union > 0 else 0
+<<<<<<< HEAD
         
     #potential_matches['interests_score'] = potential_matches['interests'].apply(calculate_interest_similarity)
+=======
+>>>>>>> 125c112bac2fc38c66c218351e060531b4b4765e
     
     # Apply the vectorized Jaccard similarity calculation to all potential matches    
     potential_matches['interests_score'] = potential_matches['interests'].apply(calculate_interest_similarity)
