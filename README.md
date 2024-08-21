@@ -1,4 +1,4 @@
-# MMA RSM8431Y - Matching App Documentation - Group20 
+# MMA RSM8431Y - Matching U App Documentation - Group20 
 ### Contributors: Kevin Abdo, Yuze Li, Kevin Liu, Ruohan Wang, Emily Zhong
 ### Instructor: Prof. Arik Senderovich
 ### Course: RSM8431 Introduction to Computer Science with Python 
