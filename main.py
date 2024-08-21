@@ -7,6 +7,11 @@ from geopy.distance import geodesic
 from random import randint
 import pandas as pd
 import numpy as np
+import nltk
+from nltk.corpus import wordnet
+
+# Download WordNet data if not already done
+nltk.download('wordnet')
 
 
 
@@ -161,7 +166,7 @@ class GUI:
             messagebox.showinfo(title="Oops", message="Please make sure you fill all the boxes")
         elif user_age.isnumeric() == False:
             messagebox.showinfo(title="Oops", message="Age should be a number")
-        elif user_age < 18:
+        elif int(user_age) < 18:
             messagebox.showinfo(title="Oops", message="Please be over 18 to user this app")
         else:
             manager.add_user(None, user_name, int(user_age), user_gender, user_location, user_interests)
@@ -522,10 +527,45 @@ class UserProfile:
         self.gender = gender
         self.location = location
         self.interests = interests.split(',')
-        self.liked_users = list(map(int,liked_users.split(','))) if liked_users != '' else []
-        self.disliked_users = list(map(int,disliked_users.split(','))) if disliked_users != '' else []
-        self.matched_users = list(map(int,matched_users.split(','))) if matched_users != '' else []
+        self.liked_users = list(map(int, liked_users.split(','))) if liked_users != '' else []
+        self.disliked_users = list(map(int, disliked_users.split(','))) if disliked_users != '' else []
+        self.matched_users = list(map(int, matched_users.split(','))) if matched_users != '' else []
         self.geolocator = Nominatim(user_agent="dating_app")
+        self.categorize_interests()  # Categorize interests when the object is initialized
+
+    def get_hobby_category(self,hobby):
+        synsets = wordnet.synsets(hobby)
+        if synsets:
+            hypernym = synsets[0].hypernyms()[0].lemmas()[0].name()
+            if 'sport' in hypernym:
+                return 'sports'
+            elif 'art' in hypernym:
+                return 'art'
+            elif 'activity' in hypernym or 'lifestyle' in hypernym:
+                return 'lifestyle'
+            elif 'intellect' in hypernym or 'knowledge' in hypernym:
+                return 'intellectual'
+        return None
+    
+    def categorize_interests(self):
+        self.categorized_interests = {hobby: self.get_hobby_category(hobby) for hobby in self.interests}
+    
+    def calculate_interest_compatibility(self, other_user: 'UserProfile') -> float:
+        exact_matches = set(self.interests) & set(other_user.interests)
+        exact_score = len(exact_matches)
+        
+        # Calculate partial category matches
+        user_categories = set(self.categorized_interests.values())
+        match_categories = set(other_user.categorized_interests.values())
+        
+        category_matches = user_categories & match_categories
+        category_score = len(category_matches) - exact_score  # Subtract exact matches to avoid double counting
+        
+        total_score = exact_score + (category_score * 0.5)  # Partial score of 0.5 for category matches
+        
+        max_possible_score = max(len(self.interests), len(other_user.interests))
+        
+        return total_score / max_possible_score if max_possible_score > 0 else 0
 
 
     def get_location_coordinates(self, location: str):
@@ -901,15 +941,19 @@ class UserManager:
 # Compute Compatibility Scores (compute the score of the current user and the other eligible user), return the id of the user with highest score
 
 def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, age_preference, gender_preference):
-    # Exclude the logged-in user from potential matches
     print(age_preference, gender_preference)
     
     # Calculate **location** compatibility score
     for index, row in potential_matches.iterrows():
         other_user = manager.fetch_one_user(int(potential_matches.loc[index]['user_id']))
         potential_matches.at[index, 'location_score'] = logged_in_user.calculate_compatibility(other_user)
+        
+        # Calculate interest compatibility score
+        interest_score = logged_in_user.calculate_interest_compatibility(other_user)
+        potential_matches.at[index, 'interests_score'] = interest_score
 
     print(potential_matches["location_score"])
+    
     # Calculate **age** difference score using current user's age preference
     potential_matches['age_diff_score'] = 1 / np.abs(1 + potential_matches['age'] - age_preference)
 
@@ -928,8 +972,8 @@ def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, 
     potential_matches['compatibility_score'] = (
         0.25 * potential_matches['location_score'] +
         0.25 * potential_matches['age_diff_score'] +
-        0.25 * potential_matches['gender_score']
-        #0.25 * potential_matches['interests_score']
+        0.25 * potential_matches['gender_score'] +
+        0.25 * potential_matches['interests_score']
     )
 
     #may update with kevin's code later
@@ -939,6 +983,7 @@ def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, 
     potential_matches = potential_matches.sort_values(by='compatibility_score', ascending=False)
     # Return id of the user with highest compatibility score
     return potential_matches['user_id'].iloc[0]
+
 
 # Rank the Potential Matches and Display the Top 3
 def display_top_matches(potential_matches, top_n=3):
@@ -960,15 +1005,15 @@ if __name__ == "__main__":
     '''
 
 
-    #UI = GUI()
-    #UI.menu_page()
+    # UI = GUI()
+    # UI.menu_page()
 
-    #UI.window.mainloop()
+    # UI.window.mainloop()
 
     #Test Code
     #use a user in database to test the recommend function
     #manager.like_user(5, 6)
-    user = manager.user_exists(int(5), "Cindy")
+    user = manager.user_exists(int(8), "Hannibal")
     other_user = manager.recommend_user(user)
     print(other_user.name)
 
