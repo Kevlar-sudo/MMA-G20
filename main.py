@@ -748,7 +748,7 @@ class UserManager:
             for id in user_list:
                 cursor.execute("SELECT * FROM users WHERE user_id = ?", (id,))
                 row = cursor.fetchone()
-                temp_user = UserProfile(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8])
+                #temp_user = UserProfile(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8])
                 user_dict.update({str(row[0]) + ': ' + row[1]: [row[0], row[1], row[2], row[3], row[4], row[5]]})
             return user_dict
 
@@ -851,14 +851,27 @@ class UserManager:
         if len(eligible_users) == 0:
             return False
         else:
-            compute_compatibility_score(current_user, df[df["user_id"].isin(eligible_users)])
-        #cursor.execute("SELECT * FROM users WHERE user_id = ?", (recommend,))
-        #row = cursor.fetchone()
-        #other_user = UserProfile(row[0], row[1], row[2], row[3], row[4], row[5],row[6],row[7],row[8])
-        return False
+            if len(current_user.liked_users) == 0:
+                age_preference = current_user.age
+                gender_preference = 0.5
+            else:
+                liked_df = df[df["user_id"].isin(current_user.liked_users)]
+                like_count = len(liked_df.index)
+                age_preference = (current_user.age + like_count * liked_df.loc[:, 'age'].mean())/(like_count + 1)
+                gender_dict = liked_df['gender'].value_counts().to_dict()
+                gender_preference = (gender_dict['M'] + 0.5) / (like_count + 1)
 
+        recommend = compute_compatibility_score(current_user, df[df["user_id"].isin(eligible_users)], age_preference, gender_preference)
+        print(recommend)
 
+        return self.fetch_one_user(int(recommend))
 
+    def fetch_one_user(self, user_id):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE user_id = ?", (user_id,))
+        row = cursor.fetchone()
+        user = UserProfile(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8])
+        return user
     def fetch_all_users(self):
         df = pd.read_sql_query("SELECT * FROM users", self.conn)
         # Convert each comma-separated string in the 'interests' column to a list of interests
@@ -875,15 +888,15 @@ class UserManager:
         df['matches'] = df['matches'].apply(
             lambda x: map(int, x.split(',')) if x else [])
 
-        self.conn.close()
+
         return df
 
        
 
 
-# Compute Compatibility Scores (compute the score of the current user and the other eligible user)
+# Compute Compatibility Scores (compute the score of the current user and the other eligible user), return the id of the user with highest score
 
-def compute_compatibility_score(logged_in_user, potential_matches):
+def compute_compatibility_score(logged_in_user, potential_matches, age_preference, gender_preference):
     # Exclude the logged-in user from potential matches
     # exclude yourself
     #potential_matches = users_df[users_df['user_id'] != logged_in_user.user_id].copy()
@@ -891,17 +904,30 @@ def compute_compatibility_score(logged_in_user, potential_matches):
     # original approach
     # potential_matches['location_score'] = (potential_matches['location'] == logged_in_user.location).astype(
     #    float)
-    print(potential_matches)
+    print(age_preference, gender_preference)
     # updated Calculated **location** compatibility score -> use Geo-location
-    potential_matches['location_score'] = calculate_compatibility(logged_in_user, potential_matches)
+    #potential_matches['location_score'] = calculate_compatibility(logged_in_user, potential_matches)
 
     # Alternative is to go over location by location and set to 1.0 when matches and 0.0 if doesn't
     # more creative: use Geo-location (so convert address to GPS point)
 
     # we also want to consider gender as a factor that can affect the matching sco
 
-    # Calculate **age** difference score using NumPy's vectorized operations
-    potential_matches['age_diff_score'] = 1 / (1 + np.abs(potential_matches['age'] - logged_in_user.age))
+    # Calculate **age** difference score using current user's age preference
+
+    potential_matches['age_diff_score'] = 1 / np.abs(1 + potential_matches['age'] - age_preference)
+    # Calculate gender score using current user's gender preference
+    for index, row in potential_matches.iterrows():
+        potential_matches.loc[index]['age_score'] = 1 / (1 + np.abs(row['age'] - age_preference))
+
+        if potential_matches.loc[index]['gender'] == 'M':
+            potential_matches.loc[index, 'gender_score'] = 1-(1-gender_preference)
+            print(potential_matches.loc[index, 'gender_score'])
+        else:
+            potential_matches.loc[index, 'gender_score'] = 1 - gender_preference
+            print(potential_matches.loc[index, 'gender_score'])
+
+
 
     #INTEREST SCORE
 
@@ -946,21 +972,19 @@ def compute_compatibility_score(logged_in_user, potential_matches):
 
     # Combine the individual scores into a final compatibility score using NumPy's vectorized operations
     potential_matches['compatibility_score'] = (
-        0.25 * potential_matches['location_score'] +
-        0.5 * potential_matches['age_diff_score'] +
-        0.25 * potential_matches['interests_score']
+        #0.25 * potential_matches['location_score'] +
+        0.25  * potential_matches['age_diff_score'] +
+        0.25 * potential_matches['gender_score']
+        #0.25 * potential_matches['interests_score']
         )
+
     #may update with kevin's code later
-   
-  
-
-
-    
+    print(potential_matches)
 
     # Sort by the compatibility score in descending order
     potential_matches = potential_matches.sort_values(by='compatibility_score', ascending=False)
-
-    return potential_matches
+    # Return id of the user with highest compatibility score
+    return potential_matches['user_id'].iloc[0]
 
     # Rank the Potential Matches and Display the Top 3
 def display_top_matches(potential_matches, top_n=3):
@@ -989,10 +1013,9 @@ if __name__ == "__main__":
 
     #Test Code
     #use a user in database to test the recommend function
+    #manager.like_user(5, 6)
     user = manager.user_exists(int(5), "Cindy")
     other_user = manager.recommend_user(user)
-    if other_user:
-        print(other_user.name)
-    else:
-        print("None")
+    print(other_user.name)
+
 #Load All Users into a Pandas DataFrame
