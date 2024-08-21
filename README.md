@@ -46,10 +46,10 @@ The User Profile class is created to show each user's profile in the system, com
  
  
  ## Tools
-Pandas DataFrame:
+### Pandas DataFrame:
 When conducting complex operations like computing compatibility scores between users or generating recommendations, user data is temporarily loaded into a Pandas DataFrame. The DataFrame allows for vectorized operations and quick comparisons, with columns representing user attributes (age, gender, interests) and interaction data (liked, disliked, and matched users).
 
-Dictionaries and Lists:
+### Dictionaries and Lists:
 In various parts of the application, dictionaries are used to store user information and lookup results, particularly when fetching user profiles or calculating interest similarities. Lists are also used within the user profiles to store liked, disliked, and matched user IDs.
 
 
