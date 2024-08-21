@@ -161,6 +161,8 @@ class GUI:
             messagebox.showinfo(title="Oops", message="Please make sure you fill all the boxes")
         elif user_age.isnumeric() == False:
             messagebox.showinfo(title="Oops", message="Age should be a number")
+        elif user_age < 18:
+            messagebox.showinfo(title="Oops", message="Please be over 18 to user this app")
         else:
             manager.add_user(None, user_name, int(user_age), user_gender, user_location, user_interests)
 
