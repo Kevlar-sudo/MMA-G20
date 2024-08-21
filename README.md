@@ -21,17 +21,26 @@ The User Profile class is created to show each user's profile in the system, com
 - matched_users (list of int): A list of user IDs that have been mutually matched with this user.
 
  
+### Database Integration:
 
+SQLite database is created by the function *create_table* to store user profiles and their actions. 
 
+The system uses the SQLite database for persistent storage of user data and interactions. Python's built-in sqlite3library is used to perform all database operations, including creating, reading, updating, and deleting (CRUD) user profiles and their associated data. After the creation of the database, we perform **CRUD** operations:
 
+- C:
+*save_to_db*: create user profiles in the database.
 
+- R:
+*user_exists*: extract users' profiles and actions in the database.
 
+- U: 
+*like_user*: Updates the list of users that the current user has liked. If both users like each other, they are added to each other's match lists.
+*_add_to_matches*: Updates the list of matched users when two users mutually like each other. The matched user ID is added to the current user's match list and saved in the database.
+*dislike_user*: Updates the list of users that the current user has disliked. This ensures that the disliked user is not shown again in recommendations.
+*update_user*: Updates the current user's profile information in the database. This includes modifying attributes such as the user's name, age, gender, location, and interests. The updated information is saved back to the SQLite database, ensuring that any changes the user makes to their profile are reflected in future interactions and queries.
 
-
-
-
-
-
+- D:
+*delete_user*: delete the current user and remove the current user’s follow-up effects.
  
  ## Feature
 
