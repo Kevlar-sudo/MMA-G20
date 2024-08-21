@@ -20,6 +20,34 @@ The User Profile class is created to show each user's profile in the system, com
 - disliked_users (list of int): A list of user IDs that this user has disliked.
 - matched_users (list of int): A list of user IDs that have been mutually matched with this user.
 
+
+
+ ### Data Structure: User Profile Management
+In the user profile, users’ information, including individual user ID, name, age, gender, located city, interest, and other information, including a list of liked users, a list of disliked users, and a list of matched users will be stored and updated as well. Current user’s information will be stored in the database through SQLite connection.
+
+- *add_user*: A new user profile will be added through to store the new user’s information in the database. 
+- *user_exists*: To view an existing user profile, a given user id will be searched and will return the searching user’s a list of different information, otherwise, it will return a warning message.
+- *update_user*: Users can edit their profile information. The user’s existing profile will be extracted from the database, and the updated information, such as name, age, gender, location, and interests, will replace the old data. The changes will then be saved back to the database.
+- *delete_user*: A user profile will be removed. This function deletes the user’s profile from the database, and all references to the user in other users’ liked, disliked, and matched lists will be cleared as well.
+
+  ### User Interaction
+- *liked_user*: The other user ID will be checked or added to the list of current users’ “liked_user” if the list does not contain the other user ID. Moreover, if both users like each other, then each user will be added to the other’s like list and both return TRUE, otherwise, return False for the user who dislikes.
+- *dislike_user*: If the other user ID is not in the matching list, then the new dislike user ID will be added to the list and then updated to the database. 
+- *_add_to_matches*: If the matched user ID is not in the matching list, then the new matched user ID will be added to the list and then updated to the database. 
+- *compare_users*: If both users' existence is validated, then two user profiles will be created, and further calculated the compatibility scores between the two users. If one or both users do not exist, then an error message will be printed.
+- *recommend_user*: After extracting users from the data frame, an eligible user list will be created, but excluding the current user, liked user, and disliked user. Then, the user with the highest compatibility score will be selected as a candidate matching user. Otherwise, a “False” message will the returned. 
+
+
+
+
+
+  
+
+ 
+
+
+
+
  
 ### Database Integration:
 
