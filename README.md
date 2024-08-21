@@ -8,6 +8,7 @@ Matching U apps aim to build a bridge for adults, who want to explore and start 
 
  
  ## Usage
+ 
 
 
 
@@ -21,6 +22,8 @@ Matching U apps aim to build a bridge for adults, who want to explore and start 
 
  
  ## Feature
+### Data Structure: UserProfile class 
+The User Profile class is created to show each user's profile in the system, combined with following attributes:
 - user_id (int): A unique identifier for the user, auto-assigned by the database. 
 - name (str): The name of the user.
 - age (int): The user's age.
