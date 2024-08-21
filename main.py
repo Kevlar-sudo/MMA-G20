@@ -546,8 +546,8 @@ class UserProfile:
     def calculate_compatibility(self, other_user: 'UserProfile') -> Optional[float]:
         distance = self.calculate_distance(other_user)
         if distance is not None:
-            max_distance = 5000  # Define a max distance to normalize the score
-            compatibility_score = max(0, (max_distance - distance) / max_distance) * 100
+            max_distance = 4000  # Define a max distance to normalize the score
+            compatibility_score = max(0, (max_distance - distance) / max_distance) 
             return round(compatibility_score, 2)
         else:
             return None
@@ -898,87 +898,39 @@ class UserManager:
 
 # Compute Compatibility Scores (compute the score of the current user and the other eligible user), return the id of the user with highest score
 
-def compute_compatibility_score(logged_in_user, potential_matches, age_preference, gender_preference):
+# Compute Compatibility Scores (compute the score of the current user and the other eligible user), return the id of the user with highest score
+
+def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, age_preference, gender_preference):
     # Exclude the logged-in user from potential matches
-    # exclude yourself
-    #potential_matches = users_df[users_df['user_id'] != logged_in_user.user_id].copy()
-    # Calculate **location** compatibility score using a boolean mask and convert to float
-    # original approach
-    # potential_matches['location_score'] = (potential_matches['location'] == logged_in_user.location).astype(
-    #    float)
     print(age_preference, gender_preference)
-    # updated Calculated **location** compatibility score -> use Geo-location
-    #potential_matches['location_score'] = calculate_compatibility(logged_in_user, potential_matches)
+    
+    # Calculate **location** compatibility score
+    for index, row in potential_matches.iterrows():
+        other_user = manager.fetch_one_user(int(potential_matches.loc[index]['user_id']))
+        potential_matches.at[index, 'location_score'] = logged_in_user.calculate_compatibility(other_user)
 
-    # Alternative is to go over location by location and set to 1.0 when matches and 0.0 if doesn't
-    # more creative: use Geo-location (so convert address to GPS point)
-
-    # we also want to consider gender as a factor that can affect the matching sco
-
+    print(potential_matches["location_score"])
     # Calculate **age** difference score using current user's age preference
-
     potential_matches['age_diff_score'] = 1 / np.abs(1 + potential_matches['age'] - age_preference)
+
     # Calculate gender score using current user's gender preference
     for index, row in potential_matches.iterrows():
-        potential_matches.loc[index]['age_score'] = 1 / (1 + np.abs(row['age'] - age_preference))
+        potential_matches.at[index, 'age_score'] = 1 / (1 + np.abs(row['age'] - age_preference))
 
-        if potential_matches.loc[index]['gender'] == 'M':
-            potential_matches.loc[index, 'gender_score'] = 1-(1-gender_preference)
-            print(potential_matches.loc[index, 'gender_score'])
+        if potential_matches.at[index, 'gender'] == 'M':
+            potential_matches.at[index, 'gender_score'] = 1 - (1 - gender_preference)
+            print(potential_matches.at[index, 'gender_score'])
         else:
-            potential_matches.loc[index, 'gender_score'] = 1 - gender_preference
-            print(potential_matches.loc[index, 'gender_score'])
-
-
-
-    #INTEREST SCORE
-
-    # Convert interests lists into a set for the logged-in user for faster comparison
-    logged_in_interests_set = set(logged_in_user.interests)
-
-    # Optimize shared interests score calculation using list comprehension and apply
-    def calculate_interest_similarity(interests):
-        interests_set = set(interests)
-        intersection = len(logged_in_interests_set & interests_set)
-        union = len(logged_in_interests_set | interests_set)
-        return intersection/union if union > 0 else 0
-
-        
-    #potential_matches['interests_score'] = potential_matches['interests'].apply(calculate_interest_similarity)
-
-
-    
-    # Apply the vectorized Jaccard similarity calculation to all potential matches    
-    potential_matches['interests_score'] = potential_matches['interests'].apply(calculate_interest_similarity)
-
-                # Calculate intersection and union sizes directly
-             
-        #category = []
-        #for interest in df["interests"]:
-            #if interest in ["cycling", "hiking", "swimming", "dancing", "running", "sports", "yoga"]:
-                #category.append("Sports")
-            #elif interest in ["music", "art", "painting"]:
-                #category.append("Art")
-            #elif interest in ["gardening", "fishing", "photography", "travelling", "cooking"]:
-                #category.append("Lifestyle")
-            #elif interest in ["reading", "coding", "writing", "gaming"]:
-                #category.append("Intellectual")
-
-        #category_set = set(category)
-        #logged_in_category_set = set(logged_in_user.category)
-        #intersection_size = len(logged_in_category_set & category_set)
-        #union_size = len(logged_in_category_set | category_set)
-
-        # Return the Jaccard similarity score
-        #return intersection_size / union_size if union_size > 0 else 0
+            potential_matches.at[index, 'gender_score'] = 1 - gender_preference
+            print(potential_matches.at[index, 'gender_score'])
 
     # Combine the individual scores into a final compatibility score using NumPy's vectorized operations
     potential_matches['compatibility_score'] = (
-        #0.25 * potential_matches['location_score'] +
-        0.25  * potential_matches['age_diff_score'] +
+        0.25 * potential_matches['location_score'] +
+        0.25 * potential_matches['age_diff_score'] +
         0.25 * potential_matches['gender_score']
         #0.25 * potential_matches['interests_score']
-        )
+    )
 
     #may update with kevin's code later
     print(potential_matches)
@@ -988,7 +940,7 @@ def compute_compatibility_score(logged_in_user, potential_matches, age_preferenc
     # Return id of the user with highest compatibility score
     return potential_matches['user_id'].iloc[0]
 
-    # Rank the Potential Matches and Display the Top 3
+# Rank the Potential Matches and Display the Top 3
 def display_top_matches(potential_matches, top_n=3):
     top_matches = potential_matches[['user_id', 'name', 'location', 'age', 'compatibility_score']].head(top_n)
     print("Top Matches:")
