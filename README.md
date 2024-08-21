@@ -77,7 +77,21 @@ The system uses the SQLite database for persistent storage of user data and inte
  ## Feature
 
 
-
+User Commands
+create_user:
+This command allows you to create a new user profile in the system by providing details such as name, age, gender, location, and interests. The user profile will be stored in the database.
+view_profiles:
+View all user profiles in the system. The profiles will display user details such as name, age, gender, location, and interests.
+edit_profile:
+Edit an existing user profile. You can update details such as name, age, gender, location, or interests by specifying the user's ID.
+delete_profile:
+Delete a user profile by specifying the user ID. This will remove the user from the database and all related records (liked, disliked, and matched users) will be cleared.
+like_user:
+Like another user's profile by specifying the user ID. If both users like each other, they will be marked as a match in the system.
+dislike_user:
+Dislike another user's profile by specifying the user ID. Disliked profiles will not be shown in future recommendations.
+view_matches:
+View all the profiles of users who have been matched with you (i.e., both users have liked each other). Matches will be shown based on compatibility and mutual likes.
 
 
 
