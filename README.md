@@ -21,7 +21,7 @@ Matching U apps aim to build a bridge for adults, who want to explore and start 
 
  
  ## Feature
-user_id (int): A unique identifier for the user, auto-assigned by the database.
+user_id (int): A unique identifier for the user, auto-assigned by the database. \n
 name (str): The name of the user.
 age (int): The user's age.
 gender (str): The user's gender, typically represented as "M" or "F".
@@ -29,7 +29,7 @@ location (str): The city, where the user lives.
 interests (list of str): A list of the user's interests, like "yoga, swimming", "reading", "cooking", etc.
 liked_users (list of int): A list of user IDs that this user has liked.
 disliked_users (list of int): A list of user IDs that this user has disliked.
-matched_users (list of int): A list of user IDs that have been mutually matched with this user.
+- matched_users (list of int): A list of user IDs that have been mutually matched with this user.
 
 
 
