@@ -7,8 +7,8 @@
 Matching U apps aim to build a bridge for adults, who want to explore and start their love journeys. Matching U focuses on helping users find the best partner based on three main considerations: age, location, and interests. When new users open the Matching U app, they can easily start by entering personal information and preferences such as age, gender, and interest to create their own profile. Then, with the unique user ID and name, they can log in to the Matching U app. Next, there are several actions that the user can take, including editing and viewing their own profile, viewing other users' profiles, liking and disliking other users, deleting their own profile, and logging out. The matching U app will use the algorithm to recommend potential matches to the current users
 
  
- ## Usage
- ### Data Structure: UserProfile class 
+## Usage
+### Data Structure: UserProfile class 
 The User Profile class is created to show each user's profile in the system, combined with the following attributes:
 - user_id (int): A unique identifier for the user, auto-assigned by the database. 
 - name (str): The name of the user.
@@ -22,7 +22,7 @@ The User Profile class is created to show each user's profile in the system, com
 
 
 
- ### Data Structure: User Profile Management
+### Data Structure: User Profile Management
 In the user profile, users’ information, including individual user ID, name, age, gender, located city, interest, and other information, including a list of liked users, a list of disliked users, and a list of matched users will be stored and updated as well. Current user’s information will be stored in the database through SQLite connection.
 
 - *add_user*: A new user profile will be added through to store the new user’s information in the database. 
@@ -30,7 +30,7 @@ In the user profile, users’ information, including individual user ID, name, a
 - *update_user*: Users can edit their profile information. The user’s existing profile will be extracted from the database, and the updated information, such as name, age, gender, location, and interests, will replace the old data. The changes will then be saved back to the database.
 - *delete_user*: A user profile will be removed. This function deletes the user’s profile from the database, and all references to the user in other users’ liked, disliked, and matched lists will be cleared as well.
 
-  ### User Interaction
+### User Interaction
 - *liked_user*: The other user ID will be checked or added to the list of current users’ “liked_user” if the list does not contain the other user ID. Moreover, if both users like each other, then each user will be added to the other’s like list and both return TRUE, otherwise, return False for the user who dislikes.
 - *dislike_user*: If the other user ID is not in the matching list, then the new dislike user ID will be added to the list and then updated to the database. 
 - *_add_to_matches*: If the matched user ID is not in the matching list, then the new matched user ID will be added to the list and then updated to the database. 
