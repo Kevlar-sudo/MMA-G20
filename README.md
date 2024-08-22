@@ -90,8 +90,6 @@ Based on each user’s preference, they can rank each component, and the weighte
 
 
 
-
-
  
  
 ## Tools
