@@ -67,13 +67,13 @@ The system uses the SQLite database for persistent storage of user data and inte
 ## Feature
  
 ### User Commands:
--*create_user*: Create a new user profile with information, including name, age, gender, location, and interests in the system which will be stored in the database.
--*view_profiles*: All user profile details can be viewed in the system.
--*edit_profile*: Users could update or edit details, like name, age, location, or interests based on searching each user ID.
--*delete_profile*: User profile and previous actions (liked, disliked, and matched users) will be cleared.
--*like_user*: Updates the list of matched users when two users mutually like each other. The matched user ID is added to the current user's match list and saved in the database.
--*dislike_user*: Updates the list of users that the current user has disliked. This ensures that the disliked user is not shown again in recommendations.
--*view_matches*: The user could view the profiles of mutual-liked/matched users.
+- *create_user*: Create a new user profile with information, including name, age, gender, location, and interests in the system which will be stored in the database.
+- *view_profiles*: All user profile details can be viewed in the system.
+- *edit_profile*: Users could update or edit details, like name, age, location, or interests based on searching each user ID.
+- *delete_profile*: User profile and previous actions (liked, disliked, and matched users) will be cleared.
+- *like_user*: Updates the list of matched users when two users mutually like each other. The matched user ID is added to the current user's match list and saved in the database.
+- *dislike_user*: Updates the list of users that the current user has disliked. This ensures that the disliked user is not shown again in recommendations.
+- *view_matches*: The user could view the profiles of mutual-liked/matched users.
 
 
 
