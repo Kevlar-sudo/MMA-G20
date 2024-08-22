@@ -91,6 +91,9 @@ Based on each user’s preference, they can rank each component, and the weighte
  
  
 ## Tools
+### Numpy:
+- Numpy helps to calculate compatibility score as it store all user info in the matrix
+
 ### Pandas DataFrame:
 - The user data will be loaded in the Pandas Dataframe temporarily when doing some complicated operations like computing the compatibility scores between users.
 - The DataFrame allows for vectorized operations and quick comparisons, with columns representing user attributes (age, gender, interests) and interaction data (liked, disliked, and matched users).
