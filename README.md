@@ -56,11 +56,11 @@ The system uses the SQLite database for persistent storage of user data and inte
 
 
 - C:
-*save_to_db*: create user profiles in the database.
+*save_to_db*: Create user profiles in the database.
 
 
 - R:
-*user_exists*: extract users' profiles and actions in the database.
+*user_exists*: Extract users' profiles and actions in the database.
 
 
 - U: 
@@ -70,7 +70,7 @@ The system uses the SQLite database for persistent storage of user data and inte
   - *update_user*: Updates the current user's profile information in the database. This includes modifying attributes such as the user's name, age, gender, location, and interests. The updated information is saved back to the SQLite database, ensuring that any changes the user makes to their profile are reflected in future interactions and queries.
 
 - D:
-*delete_user*: delete the current user and remove the current user’s follow-up effects.
+*delete_user*: Delete the current user and remove the current user’s follow-up effects.
 
  
 ## Feature
