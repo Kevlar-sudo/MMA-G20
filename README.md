@@ -7,8 +7,8 @@
 Matching U apps aim to build a bridge for adults, who want to explore and start their love journeys. Matching U focuses on helping users find the best partner based on three main considerations: age, location, and interests. When new users open the Matching U app, they can easily start by entering personal information and preferences such as age, gender, and interest to create their own profile. Then, with the unique user ID and name, they can log in to the Matching U app. Next, there are several actions that the user can take, including editing and viewing their own profile, viewing other users' profiles, liking and disliking other users, deleting their own profile, and logging out. The matching U app will use the algorithm to recommend potential matches to the current users
 
  
- ## Usage
- ### Data Structure: UserProfile class 
+## Usage
+### Data Structure: UserProfile class 
 The User Profile class is created to show each user's profile in the system, combined with the following attributes:
 - user_id (int): A unique identifier for the user, auto-assigned by the database. 
 - name (str): The name of the user.
@@ -21,7 +21,7 @@ The User Profile class is created to show each user's profile in the system, com
 - matched_users (list of int): A list of user IDs that have been mutually matched with this user.
 
 
-  ### Data Structure: User Profile Management
+### Data Structure: User Profile Management
 In the user profile, users’ information, including individual user ID, name, age, gender, location city, interest, and other information, including a list of liked users, a list of disliked users, and a list of matched users will be stored and updated as well. Current user’s information will be stored in the database through SQLite connection.
 
 - *add_user*: A new user profile will be added to store the new user’s information in the database. 
@@ -30,7 +30,7 @@ In the user profile, users’ information, including individual user ID, name, a
 - *delete_user*: A user profile will be removed. This function deletes the user’s profile from the database, and all references to the user in other users’ liked, disliked, and matched lists will be cleared as well.
 
 
- ### User Interaction
+### User Interaction
 - *liked_user*: The liked user ID will be checked or added to the current users’ liked list depending on whether the list contains the liked user's ID. Moreover, if both users like each other, then each user will be added to the other’s liked list.
 - *dislike_user*: If the disliked user's ID is not in the current user's disliked list, their ID will be added to the list and then updated to the database. 
 - *_add_to_matches*: If the matched user's ID is not in the current user's matching list, their ID will be added to the list and then updated to the database. 
@@ -39,7 +39,7 @@ In the user profile, users’ information, including individual user ID, name, a
 
 
  
- ### Database Integration:
+### Database Integration:
 
 SQLite database is created by the function *create_table* to store user profiles and their actions. 
 
@@ -64,9 +64,9 @@ The system uses the SQLite database for persistent storage of user data and inte
 *delete_user*: delete the current user and remove the current user’s follow-up effects.
 
  
- ## Feature
+## Feature
  
- ### User Commands:
+### User Commands:
 -*create_user*: Create a new user profile with information, including name, age, gender, location, and interests in the system which will be stored in the database.
 -*view_profiles*: All user profile details can be viewed in the system.
 -*edit_profile*: Users could update or edit details, like name, age, location, or interests based on searching each user ID.
@@ -83,7 +83,7 @@ The system uses the SQLite database for persistent storage of user data and inte
 
  
  
- ## Tools
+## Tools
 ### Pandas DataFrame:
 - The user data will be loaded in the Pandas Dataframe temporarily when doing some complicated operations like computing the compatibility scores between users.
 - The DataFrame allows for vectorized operations and quick comparisons, with columns representing user attributes (age, gender, interests) and interaction data (liked, disliked, and matched users).
