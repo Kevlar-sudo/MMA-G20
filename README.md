@@ -78,8 +78,8 @@ The system uses the SQLite database for persistent storage of user data and inte
 
 ## Method/Algorithm 
 ### Vectorization and Data Processing:
-All potential matches users will be stored in a dictionary.
-- *compute_compatibility_scores*: The compatibility score between the current user and candidate user will be calculated based on their profiles. The compatibility score will be evaluated based on age, interest, gender, and location of these 4 components.
+All potential matches users will be stored in a dictionary. *compute_compatibility_scores*: The compatibility score between the current user and candidate user will be calculated based on their profiles. The compatibility score will be evaluated based on age, interest, gender, and location of these 4 components.
+
 - *Age similarity score*: The difference between the ages of the two users will be considered as the age gap. A larger gap will lead to a lower the age similarity score. If the age gap is 0 (same age), then the age similarity score is 1. 
 - *Location similarity score*: The distance will be estimated between the two users. The longer distance will result in a lower location similarity score, and the upper threshold is 4000km. An algorithm “Nominatim” is used to convert the distances between  two users’ city locations into geographic coordinates.
 - *Interest similarity score*: With a tree system, we use WordNet from NLTK to categorize all interests into 4 categories, including sports, art, lifestyle, and intellectual. Each category represents one subtree, and under each subtree, the algorithm recognizes a set of synonyms that have a common meaning and outputs a partial Interest similarity score between 0 and 1. For example, two words under the same  subtree (one category) will generate a higher score than two words under two distinct subtrees. More similar interests will get a higher interest similarity score. 
