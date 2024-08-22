@@ -2,21 +2,17 @@ import sqlite3
 from typing import Optional, List
 from tkinter import *
 from tkinter import messagebox
+
+import nltk
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 from random import randint
 import pandas as pd
 import numpy as np
-import nltk
-<<<<<<< HEAD
-=======
 from nltk.corpus import wordnet
 
 # Download WordNet data if not already done
 nltk.download('wordnet')
-
->>>>>>> 28ba0c22849d7707fb62972a954ac66e9c6f4c8e
-
 
 #Button commands should call the function UserManager class and functions in the UserManager class should call UI functions to display info and inputs/command from user.
 
@@ -261,31 +257,51 @@ class GUI:
 
     def browse_page(self, current_user):
         result = manager.recommend_user(current_user)
-        other_user = result[0]
-        compatibility_score = result[1]
         self.label.destroy()
-        self.label = Label(self.window, text=f"You are viewing {other_user.name}'s profile", font=('Arial', 16))
-        self.label.grid(row=0, column=0)
-
-        # Clear the canvas to show the user profile details
         self.canvas.delete("all")
-
-        self.canvas.create_text(100, 150, text="Name", font=('Arial', 16))
-        self.canvas.create_text(100, 200, text="Age", font=('Arial', 16))
-        self.canvas.create_text(100, 250, text="Gender", font=('Arial', 16))
-        self.canvas.create_text(100, 300, text="Location", font=('Arial', 16))
-        self.canvas.create_text(100, 350, text="Interests", font=('Arial', 16))
-        self.canvas.create_text(100, 400, text="Compatibility Score", font=('Arial', 16))
-
-        self.canvas.create_text(300, 150, text=other_user.name, font=('Arial', 16))
-        self.canvas.create_text(300, 200, text=other_user.age, font=('Arial', 16))
-        self.canvas.create_text(300, 250, text=other_user.gender, font=('Arial', 16))
-        self.canvas.create_text(300, 300, text=other_user.location, font=('Arial', 16))
-        self.canvas.create_text(300, 350, text=','.join(current_user.interests), font=('Arial', 16))
-        self.canvas.create_text(300, 400, text=compatibility_score, font=('Arial', 16))
-
-        # Remove buttons from previous page
         self.commandcanvas.delete("all")
+        #Check if the current user have viewed all other users
+        if result[0] == False:
+            self.label = Label(self.window, text=f"You viewed all the existing users", font=('Arial', 16))
+            self.label.grid(row=0, column=0)
+            self.canvas.create_text(200, 300, text="Please come back later!", font=('Arial', 16))
+
+        else:
+            other_user = result[0]
+            compatibility_score = result[1]
+            self.label = Label(self.window, text=f"You are viewing {other_user.name}'s profile", font=('Arial', 16))
+            self.label.grid(row=0, column=0)
+
+            # Clear the canvas to show the user profile details
+            self.canvas.create_text(100, 150, text="Name", font=('Arial', 16))
+            self.canvas.create_text(100, 200, text="Age", font=('Arial', 16))
+            self.canvas.create_text(100, 250, text="Gender", font=('Arial', 16))
+            self.canvas.create_text(100, 300, text="Location", font=('Arial', 16))
+            self.canvas.create_text(100, 350, text="Interests", font=('Arial', 16))
+            self.canvas.create_text(100, 400, text="Compatibility Score", font=('Arial', 16))
+
+            self.canvas.create_text(300, 150, text=other_user.name, font=('Arial', 16))
+            self.canvas.create_text(300, 200, text=other_user.age, font=('Arial', 16))
+            self.canvas.create_text(300, 250, text=other_user.gender, font=('Arial', 16))
+            self.canvas.create_text(300, 300, text=other_user.location, font=('Arial', 16))
+            self.canvas.create_text(300, 350, text=','.join(current_user.interests), font=('Arial', 16))
+            self.canvas.create_text(300, 400, text=round(compatibility_score, 3), font=('Arial', 16))
+
+
+            # Show user options with hover effects
+            self.like_button = Button(self.window, text="LIKE", font=('Arial', 16),
+                                      command=lambda: self.like_user(current_user, other_user))
+            self.like_button.bind("<Enter>", lambda e: on_enter(e, self.like_button))
+            self.like_button.bind("<Leave>", lambda e: on_leave(e, self.like_button))
+            self.commandcanvas.create_window(90, 30, window=self.like_button)
+
+            self.dislike_button = Button(self.window, text="DISLIKE", font=('Arial', 16),
+                                         command=lambda: self.dislike_user(current_user, other_user))
+            self.dislike_button.bind("<Enter>", lambda e: on_enter(e, self.dislike_button))
+            self.dislike_button.bind("<Leave>", lambda e: on_leave(e, self.dislike_button))
+            self.commandcanvas.create_window(230, 30, window=self.dislike_button)
+
+
 
         # Function to change the button's appearance on hover
         def on_enter(e, button):
@@ -294,17 +310,7 @@ class GUI:
         def on_leave(e, button):
             button['background'] = 'SystemButtonFace'  # Default color
 
-        # Show user options with hover effects
-        self.like_button = Button(self.window, text="LIKE", font=('Arial', 16), command=lambda: self.like_user(current_user, other_user))
-        self.like_button.bind("<Enter>", lambda e: on_enter(e, self.like_button))
-        self.like_button.bind("<Leave>", lambda e: on_leave(e, self.like_button))
-        self.commandcanvas.create_window(90, 30, window=self.like_button)
-
-        self.dislike_button = Button(self.window, text="DISLIKE", font=('Arial', 16), command=lambda: self.dislike_user(current_user, other_user))
-        self.dislike_button.bind("<Enter>", lambda e: on_enter(e, self.dislike_button))
-        self.dislike_button.bind("<Leave>", lambda e: on_leave(e, self.dislike_button))
-        self.commandcanvas.create_window(230, 30, window=self.dislike_button)
-
+        #Show the "Back to My Profile" button
         self.back_to_profile = Button(self.window, text="Back to My Profile", font=('Arial', 16), command=lambda: self.profile_page(current_user))
         self.back_to_profile.bind("<Enter>", lambda e: on_enter(e, self.back_to_profile))
         self.back_to_profile.bind("<Leave>", lambda e: on_leave(e, self.back_to_profile))
@@ -323,6 +329,8 @@ class GUI:
         self.canvas.create_text(300, 250, text=selected_user[3], font=('Arial', 16))
         self.canvas.create_text(300, 300, text=selected_user[4], font=('Arial', 16))
         self.canvas.create_text(300, 350, text=selected_user[5], font=('Arial', 16))
+
+
     def liked_page(self, current_user):
         #fetch all the info of the liked users, put in a dict, key are names
         user_dict = manager.fetch_users(current_user.liked_users)
@@ -338,12 +346,20 @@ class GUI:
         selected_user = StringVar()
 
         if user_dict is not False:
+            selected_user = StringVar(self.window)
+            keys = list(user_dict.keys())
+            self.liked_entry = OptionMenu(self.window, selected_user, *keys)
+            selected_user.set(keys[0])
             self.liked_entry = OptionMenu(self.window, selected_user, *list(user_dict.keys()))
             self.commandcanvas.create_window(90, 30, window=self.liked_entry)
 
             self.display_button = Button(self.window, text="Display Selected User Profile", font=('Arial', 16),
                                   command=lambda: self.display_profile(user_dict[selected_user.get()]))
             self.commandcanvas.create_window(300, 30, window=self.display_button)
+            self.dislike_instead_button = Button(self.window, text="Dislike Instead", font=('Arial', 16),
+                                       command=lambda: self.dislike_instead(current_user, manager.fetch_one_user(user_dict[selected_user.get()][0])))
+            self.commandcanvas.create_window(90, 80, window=self.dislike_instead_button)
+
 
         self.back_to_profile = Button(self.window, text="Back to My Profile", font=('Arial', 16),
                                       command=lambda: self.profile_page(current_user))
@@ -363,13 +379,19 @@ class GUI:
         self.commandcanvas.delete("all")
 
         if user_dict is not False:
-            selected_user = StringVar()
-            self.disliked_entry = OptionMenu(self.window, selected_user, *list(user_dict.keys()))
+            selected_user = StringVar(self.window)
+            keys = list(user_dict.keys())
+            self.disliked_entry = OptionMenu(self.window, selected_user, *keys)
+            selected_user.set(keys[0])
             self.commandcanvas.create_window(90, 30, window=self.disliked_entry)
 
             self.display_button = Button(self.window, text="Display Selected User Profile", font=('Arial', 16),
                                   command=lambda: self.display_profile(user_dict[selected_user.get()]))
             self.commandcanvas.create_window(300, 30, window=self.display_button)
+
+            self.like_instead_button = Button(self.window, text="Like Instead", font=('Arial', 16),
+                                  command=lambda: self.like_instead(current_user, manager.fetch_one_user(user_dict[selected_user.get()][0])))
+            self.commandcanvas.create_window(90, 80, window=self.like_instead_button)
 
         self.back_to_profile = Button(self.window, text="Back to My Profile", font=('Arial', 16),
                                       command=lambda: self.profile_page(current_user))
@@ -513,6 +535,34 @@ class GUI:
             messagebox.showinfo(title="oops!", message="You already disliked this person")
         self.browse_page(current_user)
 
+    def like_instead(self, current_user, other_user):
+        #remove the disliked user for user's dislike list.
+        current_user.disliked_users.remove(other_user.user_id)
+        current_user.update_db()
+        # The returned result is a list of booleans, first indicate if this person is already liked, second indicate if this person is matched
+        result = manager.like_user(current_user.user_id, other_user.user_id)
+
+        current_user.liked_users.append(other_user.user_id)
+        messagebox.showinfo(title="Thank you!", message="You LIKE has been saved")
+        #check if matched
+        if result[1] == True:
+            current_user.matched_users.append(other_user.user_id)
+
+        self.profile_page(current_user)
+
+    def dislike_instead(self, current_user, other_user):
+        #remove the liked user for user's like list.
+        current_user.liked_users.remove(other_user.user_id)
+        if other_user.user_id in current_user.matched_users:
+            current_user.matched_users.remove(other_user.user_id)
+            other_user.matched_users.remove(current_user.user_id)
+            other_user.update_db()
+        current_user.update_db()
+        manager.dislike_user(current_user.user_id, other_user.user_id)
+        current_user.disliked_users.append(other_user.user_id)
+        messagebox.showinfo(title="Thank you!", message="You DISLIKE has been saved")
+        self.profile_page(current_user)
+
     def compare_users(self):
         user_id1 = int(self.id_entry.get())
         self.compare_id_entry = Entry(self.window, font=('Arial', 16), width=8)
@@ -607,7 +657,27 @@ class UserProfile:
         self.user_id = cursor.lastrowid
         conn.commit()
 
-
+    def update_db(self):
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        query = """
+                    UPDATE users 
+                    SET name = ?, age = ?, gender = ?, location = ?, interests = ?, liked_users = ?, disliked_users = ?, matches = ? 
+                    WHERE user_id = ?
+                """
+        parameters = (
+            self.name,
+            self.age,
+            self.gender,
+            self.location,
+            ','.join(map(str, self.interests)) if self.interests else '',
+            ','.join(map(str, self.liked_users)) if self.liked_users else '',
+            ','.join(map(str, self.disliked_users)) if self.disliked_users else '',
+            ','.join(map(str, self.matched_users)) if self.matched_users else '',
+            self.user_id
+        )
+        cursor.execute(query, parameters)
+        conn.commit()
 class UserManager:
     def __init__(self, db_path: str) -> None:
         self.conn = sqlite3.connect(db_path)
@@ -855,7 +925,7 @@ class UserManager:
                 eligible_users.append(df["user_id"][ind])
         #check if there are eligible users
         if len(eligible_users) == 0:
-            return False
+            return [False, False]
         else:
             if len(current_user.liked_users) == 0:
                 age_preference = current_user.age
@@ -865,7 +935,10 @@ class UserManager:
                 like_count = len(liked_df.index)
                 age_preference = (current_user.age + like_count * liked_df.loc[:, 'age'].mean())/(like_count + 1)
                 gender_dict = liked_df['gender'].value_counts().to_dict()
-                gender_preference = (gender_dict['M'] + 0.5) / (like_count + 1)
+                if 'M' in liked_df.keys():
+                    gender_preference = (gender_dict['M'] + 0.5) / (like_count + 1)
+                else:
+                    gender_preference = 0.5/(like_count +1)
 
         recommend = compute_compatibility_score(current_user, df[df["user_id"].isin(eligible_users)], age_preference, gender_preference)
 
@@ -914,13 +987,11 @@ def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, 
         interest_score = logged_in_user.calculate_interest_compatibility(other_user)
         potential_matches.at[index, 'interests_score'] = interest_score
 
-<<<<<<< HEAD
-=======
     print(potential_matches["location_score"])
     
->>>>>>> 28ba0c22849d7707fb62972a954ac66e9c6f4c8e
+
     # Calculate **age** difference score using current user's age preference
-    potential_matches['age_diff_score'] = 1 / np.abs(1 + potential_matches['age'] - age_preference)
+    potential_matches['age_diff_score'] = 1 / (1 + abs(potential_matches['age'] - age_preference))
 
     # Calculate **gender** score using current user's gender preference
     for index, row in potential_matches.iterrows():
@@ -969,16 +1040,16 @@ if __name__ == "__main__":
     '''
 
 
-    # UI = GUI()
-    # UI.menu_page()
+    UI = GUI()
+    UI.menu_page()
 
-    # UI.window.mainloop()
+    UI.window.mainloop()
 
     #Test Code
     #use a user in database to test the recommend function
     #manager.like_user(5, 6)
-    user = manager.user_exists(int(8), "Hannibal")
-    other_user = manager.recommend_user(user)
-    print(other_user[0].name)
+    #user = manager.user_exists(int(8), "Hannibal")
+    #other_user = manager.recommend_user(user)
+    #print(other_user[0].name)
 
 #Load All Users into a Pandas DataFrame
