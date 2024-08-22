@@ -86,8 +86,7 @@ All potential matches users will be stored in a dictionary. *compute_compatibili
 **Gender score: the same gender will produce a gender score of 0, and a different gender (M vs. F) will produce a gender score of 1**
 
 
-**Based on each user’s preference, they can rank each component, and the weighted coefficient based on the rank will be assigned. The total weight of 4 components will be partitioned  into 5 parts equally (20% each). The top-ranked components will account for 2 shares (40%), and the rest will have 1 share (20%). Finally, the compatibility score and suggested candidate user, who has the  highest compatibility score will be generated.**
-
+Based on each user’s preference, they can rank each component, and the weighted coefficient based on the rank will be assigned. The total weight of 4 components will be partitioned  into 5 parts equally (20% each). The top-ranked components will account for 2 shares (40%), and the rest will have 1 share (20%). Finally, the compatibility score and suggested candidate user, who has the  highest compatibility score will be generated.
 
 
  
