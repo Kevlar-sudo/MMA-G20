@@ -3,6 +3,13 @@
 ### Instructor: Prof. Arik Senderovich
 ### Course: RSM8431 Introduction to Computer Science with Python 
 
+## How to run code 
+- If the code doesn't run properly make sure the packages needed are installed using pip or pip3
+- When registering a user make sure the city is an actual city name in the world since we are querying a real world database. i.e. "San Francisco" , "Paris", "Tokyo" are all valid options if not the score won't be calculated properly
+- Make sure that interests are realistic so that contribution scores are calculated properly
+
+
+
 ## Description
 **Matching U** apps aim to build a bridge for adults, who want to explore and start their love journeys. Matching U focuses on helping users find the best partner based on four main considerations: age, location, interests, and gender. When new users open the Matching U app, they can easily start by entering personal information and preferences such as age, gender, and interest to create their own profile. Then, with the unique user ID and name, they can log in to the Matching U app. Next, there are several actions that the user can take, including editing and viewing their own profile, viewing other users' profiles, liking and disliking other users, deleting their own profile, and logging out. The matching U app will use the algorithm to recommend potential matches to the current users.
 
@@ -69,11 +76,12 @@ The system uses the SQLite database for persistent storage of user data and inte
 ### User Commands:
 - *create_user*: Create a new user profile with information, including name, age, gender, location, and interests in the system which will be stored in the database.
 - *view_profiles*: All user profile details can be viewed in the system.
-- *edit_profile*: Users could update or edit details, like name, age, location, or interests based on searching each user ID.
+- *update_profile*: Users could update or edit details, like name, age, location, or interests based on searching each user ID.
 - *delete_profile*: User profile and previous actions (liked, disliked, and matched users) will be cleared.
 - *like_user*: Updates the list of matched users when two users mutually like each other. The matched user ID is added to the current user's match list and saved in the database.
 - *dislike_user*: Updates the list of users that the current user has disliked. This ensures that the disliked user is not shown again in recommendations.
 - *view_matches*: The user could view the profiles of mutual-liked/matched users.
+- Select prefered factor for the compatibility score
 
 
 ## Method/Algorithm 
@@ -92,7 +100,7 @@ Based on each user’s preference, they can rank each component, and the weighte
  
 ## Tools
 ### Numpy:
-- Numpy helps to calculate compatibility score as it store all user info in the matrix
+- NumPy is used to efficiently calculate the compatibility scores between users by storing user information, such as location, age, gender, and interests, in matrices. By leveraging NumPy's vectorized operations, we calculate various compatibility factors, including location proximity, interest similarity, age difference, and gender preference. These operations allow for the simultaneous calculation of scores for all potential matches, optimizing performance by eliminating the need for looping through individual users. The final compatibility score is computed by combining these factors using matrix operations, making the process both faster and more efficient.
 
 ### Pandas DataFrame:
 - The user data will be loaded in the Pandas Dataframe temporarily when doing some complicated operations like computing the compatibility scores between users.
