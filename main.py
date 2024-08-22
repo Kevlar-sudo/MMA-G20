@@ -108,6 +108,44 @@ class GUI:
         self.back_to_menu.bind("<Leave>", lambda e: on_leave(e, self.back_to_menu))
         self.commandcanvas.create_window(130, 30, window=self.back_to_menu)
 
+    def factor_page(self, current_user):
+        self.label.destroy()
+        self.label = Label(self.window, text="What is the most important factor in selecting your partner", font=('Arial', 16))
+        self.label.grid(row=0, column=0)
+        self.canvas.delete("all")
+
+        pref_entry = StringVar(self.window)
+        self.preference_entry = OptionMenu(self.window, pref_entry, "age_diff_score", "location_score", "gender_score", "interests_score")
+        self.canvas.create_window(250, 200, window=self.preference_entry)
+        
+        self.canvas.create_text(100, 200, text="Deciding Factor", font=('Arial', 16))
+        
+        # Remove buttons from menu page
+        self.commandcanvas.delete("all")
+
+        # Function to change the button's appearance on hover
+        def on_enter(e, button):
+            button['background'] = 'lightblue'  # Highlight color
+
+        def on_leave(e, button):
+            button['background'] = 'SystemButtonFace'  # Default color
+
+        # Function to be called when the user clicks "Start Browsing"
+        def start_browsing():
+            preference = pref_entry.get()  # Get the user's selection when button is clicked
+            self.browse_page(current_user, preference)
+        
+        # Create user profile button with hover effect
+        self.create_user = Button(self.window, text="Start Browsing", font=('Arial', 16), fg='green', command=start_browsing)
+        self.create_user.bind("<Enter>", lambda e: on_enter(e, self.create_user))
+        self.create_user.bind("<Leave>", lambda e: on_leave(e, self.create_user))
+        self.commandcanvas.create_window(400, 30, window=self.create_user)
+
+        self.back_to_menu = Button(self.window, text="Back To Menu", font=('Arial', 16), command=self.menu_page)
+        self.back_to_menu.bind("<Enter>", lambda e: on_enter(e, self.back_to_menu))
+        self.back_to_menu.bind("<Leave>", lambda e: on_leave(e, self.back_to_menu))
+        self.commandcanvas.create_window(130, 30, window=self.back_to_menu)
+
 
 
     def log_in_page(self):
@@ -224,7 +262,7 @@ class GUI:
         self.user_log_out.bind("<Leave>", lambda e: on_leave(e, self.user_log_out))
         self.commandcanvas.create_window(90, 30, window=self.user_log_out)
 
-        self.user_browse = Button(self.window, text="        Start Browsing        ", font=('Arial', 16), fg='green', command=lambda: self.browse_page(current_user))
+        self.user_browse = Button(self.window, text="        Start Browsing        ", font=('Arial', 16), fg='green', command=lambda: self.factor_page(current_user))
         self.user_browse.bind("<Enter>", lambda e: on_enter(e, self.user_browse))
         self.user_browse.bind("<Leave>", lambda e: on_leave(e, self.user_browse))
         self.commandcanvas.create_window(230, 140, window=self.user_browse)
@@ -255,8 +293,8 @@ class GUI:
         self.user_delete.bind("<Leave>", lambda e: on_leave(e, self.user_delete))
         self.commandcanvas.create_window(230, 30, window=self.user_delete)
 
-    def browse_page(self, current_user):
-        result = manager.recommend_user(current_user)
+    def browse_page(self, current_user, preference):
+        result = manager.recommend_user(current_user, preference)
         self.label.destroy()
         self.canvas.delete("all")
         self.commandcanvas.delete("all")
@@ -290,13 +328,13 @@ class GUI:
 
             # Show user options with hover effects
             self.like_button = Button(self.window, text="LIKE", font=('Arial', 16),
-                                      command=lambda: self.like_user(current_user, other_user))
+                                      command=lambda: self.like_user(current_user, other_user, preference))
             self.like_button.bind("<Enter>", lambda e: on_enter(e, self.like_button))
             self.like_button.bind("<Leave>", lambda e: on_leave(e, self.like_button))
             self.commandcanvas.create_window(90, 30, window=self.like_button)
 
             self.dislike_button = Button(self.window, text="DISLIKE", font=('Arial', 16),
-                                         command=lambda: self.dislike_user(current_user, other_user))
+                                         command=lambda: self.dislike_user(current_user, other_user, preference))
             self.dislike_button.bind("<Enter>", lambda e: on_enter(e, self.dislike_button))
             self.dislike_button.bind("<Leave>", lambda e: on_leave(e, self.dislike_button))
             self.commandcanvas.create_window(230, 30, window=self.dislike_button)
@@ -513,7 +551,7 @@ class GUI:
                                       command=lambda: self.profile_page(current_user))
         self.commandcanvas.create_window(300, 80, window=self.back_to_profile)
 
-    def like_user(self, current_user, other_user):
+    def like_user(self, current_user, other_user, preference):
         #The returned result is a list of booleans, first indicate if this person is already liked, second indicate if this person is matched
         result = manager.like_user(current_user.user_id, other_user.user_id)
 
@@ -524,16 +562,16 @@ class GUI:
                 current_user.matched_users.append(other_user.user_id)
         else:
             messagebox.showinfo(title="oops!", message="You already liked this person")
-        self.browse_page(current_user)
+        self.browse_page(current_user, preference)
 
-    def dislike_user(self, current_user, other_user):
+    def dislike_user(self, current_user, other_user, preference):
         result = manager.dislike_user(current_user.user_id, other_user.user_id)
         if result == True:
             current_user.disliked_users.append(other_user.user_id)
             messagebox.showinfo(title="Thank you!", message="You DISLIKE has been saved")
         else:
             messagebox.showinfo(title="oops!", message="You already disliked this person")
-        self.browse_page(current_user)
+        self.browse_page(current_user, preference)
 
     def like_instead(self, current_user, other_user):
         #remove the disliked user for user's dislike list.
@@ -913,7 +951,7 @@ class UserManager:
             user.view_profile()
 
     #This function gets the current user info from the browse_page function in the GUI class, and returned the eligible user with the highest compatibility score, if no other users are eligible (current user viewed all the existing profiles), this function returns False.
-    def recommend_user(self, current_user):
+    def recommend_user(self, current_user, factor_preference):
         cursor = self.conn.cursor()
         df = self.fetch_all_users()
         eligible_users = []
@@ -940,7 +978,7 @@ class UserManager:
                 else:
                     gender_preference = 0.5/(like_count +1)
 
-        recommend = compute_compatibility_score(current_user, df[df["user_id"].isin(eligible_users)], age_preference, gender_preference)
+        recommend = compute_compatibility_score(current_user, df[df["user_id"].isin(eligible_users)], age_preference, gender_preference, factor_preference)
 
         return [self.fetch_one_user(int(recommend[0])), recommend[1]]
 
@@ -975,7 +1013,7 @@ class UserManager:
 # Compute Compatibility Scores (compute the score of the current user and the other eligible user), return the id of the user with highest score
 
 
-def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, age_preference, gender_preference):
+def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, age_preference, gender_preference, factor_preference):
     print(age_preference, gender_preference)
     
     # Calculate **location** compatibility score
@@ -1002,13 +1040,14 @@ def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, 
         else:
             potential_matches.at[index, 'gender_score'] = 1 - gender_preference
             print(potential_matches.at[index, 'gender_score'])
-
+    print(factor_preference)
     # Combine the individual scores into a final compatibility score using NumPy's vectorized operations
     potential_matches['compatibility_score'] = (
-        0.25 * potential_matches['location_score'] +
-        0.25 * potential_matches['age_diff_score'] +
-        0.25 * potential_matches['gender_score'] +
-        0.25 * potential_matches['interests_score']
+        0.2 * potential_matches['location_score'] +
+        0.2 * potential_matches['age_diff_score'] +
+        0.2 * potential_matches['gender_score'] +
+        0.2 * potential_matches['interests_score'] +
+        0.2 * potential_matches[factor_preference]
     )
 
     #may update with kevin's code later
