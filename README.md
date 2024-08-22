@@ -85,7 +85,8 @@ The system uses the SQLite database for persistent storage of user data and inte
 
  ## Tools
 ### Pandas DataFrame:
-The user data will be loaded in the Pandas Dataframe temporarily when doing some complicated operations like computing the compatibility scores between users. The DataFrame allows for vectorized operations and quick comparisons, with columns representing user attributes (age, gender, interests) and interaction data (liked, disliked, and matched users).
+- The user data will be loaded in the Pandas Dataframe temporarily when doing some complicated operations like computing the compatibility scores between users.
+- The DataFrame allows for vectorized operations and quick comparisons, with columns representing user attributes (age, gender, interests) and interaction data (liked, disliked, and matched users).
 
 ### Dictionaries and Lists:
 -  Dictionaries are applied to store user information and present results in most cases, for example, it allow us to fetch user profiles or find interest similarities. 
