@@ -35,7 +35,7 @@ In the user profile, users’ information, including individual user ID, name, a
 - *dislike_user*: If the disliked user's ID is not in the current user's disliked list, their ID will be added to the list and then updated to the database. 
 - *_add_to_matches*: If the matched user's ID is not in the current user's matching list, their ID will be added to the list and then updated to the database. 
 - *compare_users*: If both users' IDs are valid and match their names, two users' profiles will be created. Further, the compatibility scores will be calculated between two users.
-- *recommend_user*: After extracting users from the dataframe, an eligible user list will be created excluding the current user, liked user, and disliked user. Then, the user with the highest compatibility score will be suggested as the best matching user.
+- *recommend_user*: After extracting users from the dataframe, an eligible user list will be created excluding the current user, liked user, and disliked user. Then, the user with the highest compatibility score will be suggested as the best-matching user.
 
 
 
