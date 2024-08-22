@@ -103,10 +103,6 @@ Based on each user’s preference, they can rank each component, and the weighte
 - Lists are applied to store liked, disliked, and matched user IDs in the user profiles. 
 
 
-
-
- 
- ## Contact Information
  
  
  
