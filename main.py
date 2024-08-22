@@ -257,9 +257,8 @@ class GUI:
         self.commandcanvas.create_window(230, 30, window=self.user_delete)
 
     def browse_page(self, current_user):
-        result = manager.recommend_user(current_user)
-        other_user = result[0]
-        compatibility_score = result[1]
+        other_user = manager.recommend_user(current_user)
+
         self.label.destroy()
         self.label = Label(self.window, text=f"You are viewing {other_user.name}'s profile", font=('Arial', 16))
         self.label.grid(row=0, column=0)
@@ -272,14 +271,12 @@ class GUI:
         self.canvas.create_text(100, 250, text="Gender", font=('Arial', 16))
         self.canvas.create_text(100, 300, text="Location", font=('Arial', 16))
         self.canvas.create_text(100, 350, text="Interests", font=('Arial', 16))
-        self.canvas.create_text(100, 400, text="Compatibility Score", font=('Arial', 16))
 
         self.canvas.create_text(300, 150, text=other_user.name, font=('Arial', 16))
         self.canvas.create_text(300, 200, text=other_user.age, font=('Arial', 16))
         self.canvas.create_text(300, 250, text=other_user.gender, font=('Arial', 16))
         self.canvas.create_text(300, 300, text=other_user.location, font=('Arial', 16))
         self.canvas.create_text(300, 350, text=','.join(current_user.interests), font=('Arial', 16))
-        self.canvas.create_text(300, 400, text=compatibility_score, font=('Arial', 16))
 
         # Remove buttons from previous page
         self.commandcanvas.delete("all")
@@ -604,7 +601,49 @@ class UserProfile:
         self.user_id = cursor.lastrowid
         conn.commit()
 
+    #This function is not needed, user update function in UserManager Class
+    '''
+    def update_profile(self, conn: sqlite3.Connection, name: Optional[str] = None, age: Optional[int] = None,
+                    gender: Optional[str] = None, location: Optional[str] = None,
+                    interests: Optional[List[str]] = None, liked_users: Optional[List[int]] = None,
+                    disliked_users: Optional[List[int]] = None, matched_users: Optional[List[int]] = None) -> None:
+        cursor = conn.cursor()
+        # Retrieve the current values if not provided
+        cursor.execute("SELECT name, age, gender, location, interests, liked_users, disliked_users, matches FROM users WHERE user_id = ?", (self.user_id,))
+        current_values = cursor.fetchone()
+        if current_values:
+            current_name, current_age, current_gender, current_location, current_interests, \
+            current_liked_users, current_disliked_users, current_matched_users = current_values
+            self.name = name if name is not None else current_name
+            self.age = age if age is not None else current_age
+            self.gender = gender if gender is not None else current_gender
+            self.location = location if location is not None else current_location
+            self.interests = interests if interests is not None else current_interests.split(',')
+            self.liked_users = liked_users if liked_users is not None else current_liked_users.split(',') if current_liked_users else []
+            self.disliked_users = disliked_users if disliked_users is not None else current_disliked_users.split(',') if current_disliked_users else []
+            self.matched_users = matched_users if matched_users is not None else current_matched_users.split(',') if current_matched_users else []
 
+            # Update the database
+            cursor.execute("""
+                UPDATE users
+                SET name = ?, age = ?, gender = ?, location = ?, interests = ?, liked_users = ?, disliked_users = ?, matches = ?
+                WHERE user_id = ?
+            """, (self.name, self.age, self.gender, self.location, ','.join(self.interests),
+                ','.join(map(str, self.liked_users)),
+                ','.join(map(str, self.disliked_users)),
+                ','.join(map(str, self.matched_users)),
+                self.user_id))
+            conn.commit()
+            print(f"User {self.user_id} updated successfully!")
+        else:
+            print(f"User {self.user_id} not found!")
+
+
+    def view_profile(self) -> None:
+        print(f"ID: {self.user_id}, Name: {self.name}, Age: {self.age}, "
+              f"Gender: {self.gender}, Location: {self.location}, "
+              f"Interests: {', '.join(self.interests)}")'''
+        
 class UserManager:
     def __init__(self, db_path: str) -> None:
         self.conn = sqlite3.connect(db_path)
@@ -865,8 +904,9 @@ class UserManager:
                 gender_preference = (gender_dict['M'] + 0.5) / (like_count + 1)
 
         recommend = compute_compatibility_score(current_user, df[df["user_id"].isin(eligible_users)], age_preference, gender_preference)
+        print(recommend)
 
-        return [self.fetch_one_user(int(recommend[0])), recommend[1]]
+        return self.fetch_one_user(int(recommend))
 
     def fetch_one_user(self, user_id):
         cursor = self.conn.cursor()
@@ -898,6 +938,7 @@ class UserManager:
 
 # Compute Compatibility Scores (compute the score of the current user and the other eligible user), return the id of the user with highest score
 
+# Compute Compatibility Scores (compute the score of the current user and the other eligible user), return the id of the user with highest score
 
 def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, age_preference, gender_preference):
     print(age_preference, gender_preference)
@@ -911,10 +952,12 @@ def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, 
         interest_score = logged_in_user.calculate_interest_compatibility(other_user)
         potential_matches.at[index, 'interests_score'] = interest_score
 
+    print(potential_matches["location_score"])
+    
     # Calculate **age** difference score using current user's age preference
     potential_matches['age_diff_score'] = 1 / np.abs(1 + potential_matches['age'] - age_preference)
 
-    # Calculate **gender** score using current user's gender preference
+    # Calculate gender score using current user's gender preference
     for index, row in potential_matches.iterrows():
         potential_matches.at[index, 'age_score'] = 1 / (1 + np.abs(row['age'] - age_preference))
 
@@ -939,7 +982,7 @@ def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, 
     # Sort by the compatibility score in descending order
     potential_matches = potential_matches.sort_values(by='compatibility_score', ascending=False)
     # Return id of the user with highest compatibility score
-    return [potential_matches['user_id'].iloc[0], potential_matches['compatibility_score'].iloc[0]]
+    return potential_matches['user_id'].iloc[0]
 
 
 # Rank the Potential Matches and Display the Top 3
@@ -972,6 +1015,6 @@ if __name__ == "__main__":
     #manager.like_user(5, 6)
     user = manager.user_exists(int(8), "Hannibal")
     other_user = manager.recommend_user(user)
-    print(other_user[0].name)
+    print(other_user.name)
 
 #Load All Users into a Pandas DataFrame
