@@ -955,7 +955,7 @@ def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, 
     print(potential_matches["location_score"])
     
     # Calculate **age** difference score using current user's age preference
-    potential_matches['age_diff_score'] = 1 / np.abs(1 + potential_matches['age'] - age_preference)
+    potential_matches['age_diff_score'] = 1 / 1+ abs( potential_matches['age'] - age_preference)
 
     # Calculate gender score using current user's gender preference
     for index, row in potential_matches.iterrows():
