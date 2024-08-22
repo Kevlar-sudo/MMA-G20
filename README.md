@@ -20,6 +20,7 @@ The User Profile class is created to show each user's profile in the system, com
 - disliked_users (list of int): A list of user IDs that this user has disliked.
 - matched_users (list of int): A list of user IDs that have been mutually matched with this user.
 
+
   ### Data Structure: User Profile Management
 In the user profile, users’ information, including individual user ID, name, age, gender, location city, interest, and other information, including a list of liked users, a list of disliked users, and a list of matched users will be stored and updated as well. Current user’s information will be stored in the database through SQLite connection.
 
@@ -29,7 +30,7 @@ In the user profile, users’ information, including individual user ID, name, a
 - *delete_user*: A user profile will be removed. This function deletes the user’s profile from the database, and all references to the user in other users’ liked, disliked, and matched lists will be cleared as well.
 
 
-### User Interaction
+ ### User Interaction
 - *liked_user*: The liked user ID will be checked or added to the current users’ liked list depending on whether the list contains the liked user's ID. Moreover, if both users like each other, then each user will be added to the other’s liked list.
 - *dislike_user*: If the disliked user's ID is not in the current user's disliked list, their ID will be added to the list and then updated to the database. 
 - *_add_to_matches*: If the matched user's ID is not in the current user's matching list, their ID will be added to the list and then updated to the database. 
@@ -38,7 +39,7 @@ In the user profile, users’ information, including individual user ID, name, a
 
 
  
-### Database Integration:
+ ### Database Integration:
 
 SQLite database is created by the function *create_table* to store user profiles and their actions. 
 
