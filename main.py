@@ -976,48 +976,42 @@ class UserManager:
 
 
 def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, age_preference, gender_preference):
-    print(age_preference, gender_preference)
-    
-    # Calculate **location** compatibility score
-    for index, row in potential_matches.iterrows():
-        other_user = manager.fetch_one_user(int(potential_matches.loc[index]['user_id']))
-        potential_matches.at[index, 'location_score'] = logged_in_user.calculate_compatibility(other_user)
-        
-        # Calculate interest compatibility score
-        interest_score = logged_in_user.calculate_interest_compatibility(other_user)
-        potential_matches.at[index, 'interests_score'] = interest_score
+    # Calculate location compatibility scores for all potential matches
+    other_users = potential_matches['user_id'].apply(manager.fetch_one_user)
 
-    print(potential_matches["location_score"])
-    
+    # Calculate the location scores using NumPy
+    location_scores = np.array([
+        logged_in_user.calculate_compatibility(other_user) for other_user in other_users
+    ])
 
-    # Calculate **age** difference score using current user's age preference
-    potential_matches['age_diff_score'] = 1 / (1 + abs(potential_matches['age'] - age_preference))
+    # Calculate interest compatibility scores
+    interest_scores = np.array([
+        logged_in_user.calculate_interest_compatibility(other_user) for other_user in other_users
+    ])
 
-    # Calculate **gender** score using current user's gender preference
-    for index, row in potential_matches.iterrows():
+    # Calculate age difference scores using NumPy vectorized operations
+    age_diff_scores = 1 / (1 + np.abs(potential_matches['age'].values - age_preference))
 
-        if potential_matches.at[index, 'gender'] == 'M':
-            potential_matches.at[index, 'gender_score'] = 1 - (1 - gender_preference)
-            print(potential_matches.at[index, 'gender_score'])
-        else:
-            potential_matches.at[index, 'gender_score'] = 1 - gender_preference
-            print(potential_matches.at[index, 'gender_score'])
+    # Calculate gender scores using vectorized operations
+    gender_scores = np.where(potential_matches['gender'].values == 'M', 
+                             1 - (1 - gender_preference), 
+                             1 - gender_preference)
 
-    # Combine the individual scores into a final compatibility score using NumPy's vectorized operations
-    potential_matches['compatibility_score'] = (
-        0.25 * potential_matches['location_score'] +
-        0.25 * potential_matches['age_diff_score'] +
-        0.25 * potential_matches['gender_score'] +
-        0.25 * potential_matches['interests_score']
+    # Combine the individual scores into a final compatibility score using NumPy
+    compatibility_scores = (
+        0.25 * location_scores +
+        0.25 * age_diff_scores +
+        0.25 * gender_scores +
+        0.25 * interest_scores
     )
 
-    #may update with kevin's code later
-    print(potential_matches)
+    potential_matches['compatibility_score'] = compatibility_scores
 
-    # Sort by the compatibility score in descending order
-    potential_matches = potential_matches.sort_values(by='compatibility_score', ascending=False)
-    # Return id of the user with highest compatibility score
-    return [potential_matches['user_id'].iloc[0], potential_matches['compatibility_score'].iloc[0]]
+    # Sort by compatibility scores in descending order
+    sorted_matches = potential_matches.sort_values(by='compatibility_score', ascending=False)
+
+    # Return the user with the highest compatibility score
+    return [sorted_matches['user_id'].iloc[0], sorted_matches['compatibility_score'].iloc[0]]
 
 
 # Rank the Potential Matches and Display the Top 3
