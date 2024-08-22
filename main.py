@@ -1013,43 +1013,43 @@ class UserManager:
 # Compute Compatibility Scores (compute the score of the current user and the other eligible user), return the id of the user with highest score
 
 
-def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, age_preference, gender_preference):
-    # Calculate location compatibility scores for all potential matches
+def compute_compatibility_score(logged_in_user: UserProfile, potential_matches, age_preference, gender_preference, factor_preference):
+    # Fetch other users from the DataFrame by their user IDs
     other_users = potential_matches['user_id'].apply(manager.fetch_one_user)
 
-    # Calculate the location scores using NumPy
-    location_scores = np.array([
-        logged_in_user.calculate_compatibility(other_user) for other_user in other_users
-    ])
-
-    # Calculate interest compatibility scores
-    interest_scores = np.array([
-        logged_in_user.calculate_interest_compatibility(other_user) for other_user in other_users
-    ])
+    # Use list comprehensions or pandas `apply` to calculate location and interest compatibility
+    location_scores = np.array([logged_in_user.calculate_compatibility(other_user) for other_user in other_users])
+    interest_scores = np.array([logged_in_user.calculate_interest_compatibility(other_user) for other_user in other_users])
 
     # Calculate age difference scores using NumPy vectorized operations
     age_diff_scores = 1 / (1 + np.abs(potential_matches['age'].values - age_preference))
 
-    # Calculate gender scores using vectorized operations
+    # Calculate gender scores using vectorized operations based on gender preference
     gender_scores = np.where(potential_matches['gender'].values == 'M', 
                              1 - (1 - gender_preference), 
                              1 - gender_preference)
 
-    # Combine the individual scores into a final compatibility score using NumPy
-    compatibility_scores = (
-        0.25 * location_scores +
-        0.25 * age_diff_scores +
-        0.25 * gender_scores +
-        0.25 * interest_scores
+    # Add the calculated scores back to the DataFrame
+    potential_matches['location_score'] = location_scores
+    potential_matches['interests_score'] = interest_scores
+    potential_matches['age_diff_score'] = age_diff_scores
+    potential_matches['gender_score'] = gender_scores
+
+    # Combine the individual scores into a final compatibility score
+    potential_matches['compatibility_score'] = (
+        0.2 * potential_matches['location_score'] +
+        0.2 * potential_matches['age_diff_score'] +
+        0.2 * potential_matches['gender_score'] +
+        0.2 * potential_matches['interests_score']+
+        0.2 * potential_matches[factor_preference]
     )
 
-    potential_matches['compatibility_score'] = compatibility_scores
-
-    # Sort by compatibility scores in descending order
-    sorted_matches = potential_matches.sort_values(by='compatibility_score', ascending=False)
+    # Sort by the compatibility score based on the `factor_preference`
+    sorted_matches = potential_matches.sort_values(by=factor_preference, ascending=False)
 
     # Return the user with the highest compatibility score
     return [sorted_matches['user_id'].iloc[0], sorted_matches['compatibility_score'].iloc[0]]
+
 
 
 # Rank the Potential Matches and Display the Top 3
