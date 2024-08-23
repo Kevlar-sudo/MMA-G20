@@ -4,9 +4,9 @@
 ### Course: RSM8431 Introduction to Computer Science with Python 
 
 ## Section 1: How to run code 
-- If the code doesn't run properly make sure the packages needed are installed using pip or pip3
-- When registering a user make sure the city is an actual city name in the world since we are querying a real-world database. i.e. "San Francisco", "Paris", and "Tokyo" are all valid options if not the score won't be calculated properly
-- Please make sure that interests are realistic so that contribution scores are calculated properly
+- If the code doesn't run properly, ensure the packages needed are installed using pip or pip3.
+- When registering a user make sure the city is an actual city name in the world since we are querying a real-world database. i.e. "San Francisco", "Paris", and "Tokyo" are all valid options if not the score won't be calculated properly.
+- Please ensure that interests are realistic thus the contribution scores are calculated properly. 
 
 
 
