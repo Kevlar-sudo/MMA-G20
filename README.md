@@ -7,6 +7,7 @@
 - If the code doesn't run properly, ensure the packages needed are installed using pip or pip3.
 - When registering a user make sure the city is an actual city name in the world since we are querying a real-world database. i.e. "San Francisco", "Paris", and "Tokyo" are all valid options if not the score won't be calculated properly.
 - Please ensure that interests are realistic thus the contribution scores are calculated properly. 
+- Please be patient when browsing other users, you might need to wait a couple seconds for the system to recommend the best fit for you.
 
 
 
@@ -16,7 +17,7 @@
  
 ## Section 3: Usage / Technical
 ### Data Structure: UserProfile class 
-The User Profile class is created to show each user's profile in the system, combined with the following attributes:
+The User Profile class is created to save each user's profile in the system, combined with the following attributes:
 - user_id (int): A unique identifier for the user, auto-assigned by the database. 
 - name (str): The name of the user.
 - age (int): The user's age.
@@ -28,8 +29,8 @@ The User Profile class is created to show each user's profile in the system, com
 - matched_users (list of int): A list of user IDs that have been mutually matched with this user.
 
 
-### Data Structure: User Profile Management
-In the user profile, users’ information, including individual user ID, name, age, gender, location city, interest, and other information, including a list of liked users, a list of disliked users, and a list of matched users will be stored and updated as well. Current user’s information will be stored in the database through SQLite connection.
+### Data Structure: UserManager Class
+In the user manager, users’ information, including individual user ID, name, age, gender, location city, interest, and other information, including a list of liked users, a list of disliked users, and a list of matched users will be stored and updated and sync with the database. Current user’s information will be stored in the database through SQLite connection.
 
 - *add_user*: A new user profile will be added to store the new user’s information in the database. 
 - *user_exists*: To view an existing user profile, a given user id will be searched and will return the searching user’s a list of different information, otherwise, it will return a warning message.
@@ -54,7 +55,7 @@ The system uses the SQLite database for persistent storage of user data and inte
 
 
 - **C**:
-*save_to_db*: create user profiles in the database.
+*add_user*: create user profiles in the database.
 
 
 - **R**:
