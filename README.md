@@ -3,18 +3,18 @@
 ### Instructor: Prof. Arik Senderovich
 ### Course: RSM8431 Introduction to Computer Science with Python 
 
-## How to run code 
+## Section 1: How to run code 
 - If the code doesn't run properly make sure the packages needed are installed using pip or pip3
-- When registering a user make sure the city is an actual city name in the world since we are querying a real world database. i.e. "San Francisco" , "Paris", "Tokyo" are all valid options if not the score won't be calculated properly
-- Make sure that interests are realistic so that contribution scores are calculated properly
+- When registering a user make sure the city is an actual city name in the world since we are querying a real-world database. i.e. "San Francisco", "Paris", and "Tokyo" are all valid options if not the score won't be calculated properly
+- Please make sure that interests are realistic so that contribution scores are calculated properly
 
 
 
-## Description
-**Matching U** apps aim to build a bridge for adults, who want to explore and start their love journeys. Matching U focuses on helping users find the best partner based on four main considerations: age, location, interests, and gender. When new users open the Matching U app, they can easily start by entering personal information and preferences such as age, gender, and interest to create their own profile. Then, with the unique user ID and name, they can log in to the Matching U app. Next, there are several actions that the user can take, including editing and viewing their own profile, viewing other users' profiles, liking and disliking other users, deleting their own profile, and logging out. The matching U app will use the algorithm to recommend potential matches to the current users.
+## Section 2: Description
+**Matching U** apps aim to build a bridge for adults wanting to explore and start their love journeys. Matching U focuses on helping users find the best partner based on four main considerations: age, location, interests, and gender. When new users open the Matching U app, they can easily start by entering personal information and preferences such as age, gender, and interest to create their own profile. Then, they can log in to the Matching U app with the unique user ID and name. Next, there are several actions that the user can take, including editing and viewing their own profile, viewing other users' profiles, liking and disliking other users, deleting their own profile, and logging out. The matching U app will use the algorithm to recommend potential matches to the current users.
 
  
-## Usage / Technical
+## Section 3: Usage / Technical
 ### Data Structure: UserProfile class 
 The User Profile class is created to show each user's profile in the system, combined with the following attributes:
 - user_id (int): A unique identifier for the user, auto-assigned by the database. 
@@ -71,7 +71,7 @@ The system uses the SQLite database for persistent storage of user data and inte
 *delete_user*: delete the current user and remove the current user’s follow-up effects.
 
  
-## Feature
+## Section 4: Feature
  
 ### User Commands:
 - *create_user*: Create a new user profile with information, including name, age, gender, location, and interests in the system which will be stored in the database.
@@ -81,12 +81,12 @@ The system uses the SQLite database for persistent storage of user data and inte
 - *like_user*: Updates the list of matched users when two users mutually like each other. The matched user ID is added to the current user's match list and saved in the database.
 - *dislike_user*: Updates the list of users that the current user has disliked. This ensures that the disliked user is not shown again in recommendations.
 - *view_matches*: The user could view the profiles of mutual-liked/matched users.
-- Select prefered factor for the compatibility score
+- Select preferred factor for the compatibility score
 
 
-## Method/Algorithm 
+## Section 5: Method/Algorithm 
 ### Vectorization and Data Processing:
-All potential matches users will be stored in a dictionary. *compute_compatibility_scores*: The compatibility score between the current user and candidate user will be calculated based on their profiles. The compatibility score will be evaluated based on age, interest, gender, and location of these 4 components.
+All potential match users will be stored in a dictionary. *compute_compatibility_scores*: The compatibility score between the current user and the candidate user will be calculated based on their profiles. The compatibility score will be evaluated based on age, interest, gender, and location of these 4 components.
 
 - *Age similarity score*: The age score will be calculated based on the average age of users that the current user liked before. The closer the age of the other users is to the average age of the current user's previously liked users, the higher the age score will be.
 - *Location similarity score*: The distance between the two users will be estimated. The longer distance will result in a lower location similarity score, and the upper threshold is 4000km. An algorithm “Nominatim” is used to convert the distances between  two users’ city locations into geographic coordinates.
@@ -98,7 +98,7 @@ Based on each user’s preference, they can rank each component, and the weighte
 
  
  
-## Tools
+## Section 6: Tools
 ### Numpy:
 - NumPy is used to efficiently calculate the compatibility scores between users by storing user information, such as location, age, gender, and interests, in matrices. By leveraging NumPy's vectorized operations, we calculate various compatibility factors, including location proximity, interest similarity, age difference, and gender preference. These operations allow for the simultaneous calculation of scores for all potential matches, optimizing performance by eliminating the need for looping through individual users. The final compatibility score is computed by combining these factors using matrix operations, making the process both faster and more efficient.
 
